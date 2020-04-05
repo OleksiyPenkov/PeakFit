@@ -4,13 +4,14 @@ interface
 
 const
 
-  NPeaks = 2;
+  NPeaks = 3;
 
   sqrtpi = 1.25331;
   _4ln2  = 2.772588722;
+
 type
 
-  TFitMode = (fmGauss, fmSigma);
+  TFitMode = (fmGauss, fmGLCross);
 
   TDataPoint = record
     x, y: single;
@@ -31,21 +32,19 @@ type
     function Bound:boolean;
   end;
 
-  TGaussFitSet = record
-    A, xc, W: TVariable;
+  TFitSet = record
+    A, xc, W, s: TVariable;
+
+    function ToString: string;
   end;
 
-//  TGaussFitSet = record
-//    x0, A0, W0: single;
-//    lastX, lastA, lastW: single;
-//    dA, dXc, dW: single;
-//    xc_min, xc_max: single;
-//    W_min, W_Max: single;
-//    A_min, A_Max: single;
-//  end;
+  TFitSets = array of TFitSet;
 
 
 implementation
+
+uses
+  System.SysUtils;
 
 function TVariable.Bound:boolean;
 begin
@@ -60,6 +59,14 @@ begin
     Last := max;
     Result := True;
   end;
+end;
+
+function TFitSet.ToString:string;
+begin
+  Result := FloatToStrF(xc.Last, ffFixed, 6, 3) + '  ' +
+            FloatToStrF(A.Last, ffFixed, 6, 3) + '  ' +
+            FloatToStrF(2 * W.Last, ffFixed, 6, 3) + '  ' +
+            FloatToStrF(s.Last, ffFixed, 6, 3);
 end;
 
 end.

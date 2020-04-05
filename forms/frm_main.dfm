@@ -2,8 +2,8 @@ object frmMain: TfrmMain
   Left = 0
   Top = 0
   Caption = 'Peak Fit'
-  ClientHeight = 572
-  ClientWidth = 851
+  ClientHeight = 752
+  ClientWidth = 1009
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -18,14 +18,16 @@ object frmMain: TfrmMain
   TextHeight = 13
   object StatusBar: TRzStatusBar
     Left = 0
-    Top = 553
-    Width = 851
+    Top = 733
+    Width = 1009
     Height = 19
     BorderInner = fsNone
     BorderOuter = fsNone
     BorderSides = [sdLeft, sdTop, sdRight, sdBottom]
     BorderWidth = 0
     TabOrder = 0
+    ExplicitTop = 553
+    ExplicitWidth = 851
     object pnlChi: TRzStatusPane
       Left = 0
       Top = 0
@@ -39,7 +41,7 @@ object frmMain: TfrmMain
   object MainToolBar: TRzToolbar
     Left = 0
     Top = 0
-    Width = 851
+    Width = 1009
     Height = 29
     Images = ImageList32
     BorderInner = fsNone
@@ -47,12 +49,13 @@ object frmMain: TfrmMain
     BorderSides = [sdTop]
     BorderWidth = 0
     TabOrder = 1
+    ExplicitWidth = 851
   end
   object Chart: TChart
     Left = 0
     Top = 29
-    Width = 851
-    Height = 524
+    Width = 1009
+    Height = 704
     Legend.Visible = False
     Title.Text.Strings = (
       'TChart')
@@ -60,6 +63,8 @@ object frmMain: TfrmMain
     View3D = False
     Align = alClient
     TabOrder = 2
+    ExplicitWidth = 851
+    ExplicitHeight = 524
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object MainSeries: TLineSeries
@@ -127,6 +132,12 @@ object frmMain: TfrmMain
         Action = actFitGauss
       end
     end
+    object Window1: TMenuItem
+      Caption = 'Window'
+      object ShowLog1: TMenuItem
+        Action = actWinShowLog
+      end
+    end
     object Help1: TMenuItem
       Caption = 'Help'
     end
@@ -136,8 +147,8 @@ object frmMain: TfrmMain
     Top = 152
   end
   object Actions: TActionList
-    Left = 512
-    Top = 317
+    Left = 416
+    Top = 117
     object actFileExit: TAction
       Category = 'File'
       Caption = 'Exit'
@@ -153,6 +164,11 @@ object frmMain: TfrmMain
       Caption = 'Fit Gauss'
       ShortCut = 116
       OnExecute = actFitGaussExecute
+    end
+    object actWinShowLog: TAction
+      Category = 'Window'
+      Caption = 'Show Log'
+      OnExecute = actWinShowLogExecute
     end
   end
   object dlgImportData: TOpenDialog

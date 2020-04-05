@@ -17,24 +17,26 @@ type
 
     FLastChiSqr: Single;
 
-    Functions: array of TGaussFitSet;
+    FFunctions: TFitSets;
+    FMode: TFitMode;
 
     function ChiSqrM: single;
     function DataValue(const x: single): single;
     function DoFitGauss(Nmax: integer):single;
     function Rnd: single;
-    function GaussF(const x: single; F: TGaussFitSet): single;
+    function GaussF(const x: single; F: TFitSet): single;
     procedure CalcResulingCurves;
     function Curve(const index: Integer): TDataArray;
+    function GLCrossF(const x: single; F: TFitSet): single;
   public
     constructor Create;
     destructor Free;
 
     function Process(const AData: TDataArray): single;
-
     property Result:TResults read FResults;
     property Sum:TDataArray read FSum;
     property LastChiSqr: Single read FLastChiSqr;
+    property Functions: TFitSets read FFunctions;
 
   end;
 
@@ -44,15 +46,23 @@ var
 implementation
 
 
-function TFit.GaussF(const x: single; F: TGaussFitSet): single;
+function TFit.GaussF(const x: single; F: TFitSet): single;
 begin
   Result := 2 * F.A.Last * exp(- _4ln2 * (sqr(x - F.xc.Last) / sqr(F.W.Last)))/(F.W.Last * 1.064);
+end;
+
+function TFit.GLCrossF(const x: single; F: TFitSet): single;
+var
+  A, B: Single;
+begin
+  B := sqr((x - F.xc.Last)/F.W.Last);
+  Result := F.A.Last/(1 + F.s.Last*(B*exp(0.5*(1 - F.s.Last)*B)));
 end;
 
 function TFit.Process(const AData: TDataArray): single;
 begin
   Data := AData;
-  Result := DoFitGauss(500);
+  Result := DoFitGauss(1000);
 end;
 
 procedure TFit.CalcResulingCurves;
@@ -73,7 +83,10 @@ begin
     for j := 0 to NPeaks - 1 do
     begin
       FResults[j][i].x := Data[i].x;
-      y := GaussF(Data[i].x, Functions[j]);
+      case FMode of
+        fmGauss  :  y := GaussF(Data[i].x, FFunctions[j]);
+        fmGLCross:  y := GLCrossF(Data[i].x, FFunctions[j]);
+      end;
       FResults[j][i].y := y;
       Sum := Sum + y;
     end;
@@ -94,9 +107,12 @@ begin
     Sum := 0;
     if Data[i].y = 0 then Continue ;
 
-    for j := Low(Functions) to High(Functions) do
+    for j := Low(FFunctions) to High(FFunctions) do
     begin
-      y := GaussF(Data[i].x, Functions[j]);
+      case FMode of
+        fmGauss  :  y := GaussF(Data[i].x, FFunctions[j]);
+        fmGLCross:  y := GLCrossF(Data[i].x, FFunctions[j]);
+      end;
       Sum := Sum + y;
     end;
     Result := Result + sqr(Sum - Data[i].y )/Data[i].y;
@@ -107,7 +123,8 @@ constructor TFit.Create;
 begin
   inherited Create;
   SetLength(FResults, NPeaks);
-  SetLength(Functions, NPeaks);
+  SetLength(FFunctions, NPeaks);
+  FMode := fmGLCross;
 end;
 
 
@@ -141,7 +158,7 @@ end;
 
 function TFit.DoFitGauss(Nmax: integer):single;
 const
-  peaks: array [0 .. 1] of single = (227, 230.86);
+  peaks: array [0 .. 2] of single = (227, 230.86, 233);
 
 var
   ChiSqrMin, ChiSqrLast: single;
@@ -154,26 +171,32 @@ var
 
   begin
     Randomize;
-    for i := Low(Functions) to High(Functions) do
+    for i := Low(FFunctions) to High(FFunctions) do
     begin
-      Functions[i].xc.v0  := peaks[i];
-      Functions[i].xc.min := peaks[i] - 1;
-      Functions[i].xc.max := peaks[i] + 1;
-      Functions[i].xc.RF  := 0.1;
+      FFunctions[i].xc.v0  := peaks[i];
+      FFunctions[i].xc.min := peaks[i] - 1;
+      FFunctions[i].xc.max := peaks[i] + 1;
+      FFunctions[i].xc.RF  := 0.05;
 
-      Functions[i].A.v0  := DataValue(peaks[i]);
-      Functions[i].A.Max := Functions[i].A.v0 * 3;
-      Functions[i].A.min := Functions[i].A.v0 / 10;
-      Functions[i].A.RF  := 100;
+      FFunctions[i].A.v0  := DataValue(peaks[i]);
+      FFunctions[i].A.Max := FFunctions[i].A.v0 * 3;
+      FFunctions[i].A.min := FFunctions[i].A.v0 / 10;
+      FFunctions[i].A.RF  := 50;
 
-      Functions[i].W.v0  := 1;
-      Functions[i].W.min := 1;
-      Functions[i].W.Max := 2;
-      Functions[i].W.RF  := 0.2;
+      FFunctions[i].W.v0  := 0.1;
+      FFunctions[i].W.min := 0.1;
+      FFunctions[i].W.Max := 3;
+      FFunctions[i].W.RF  := 0.2;
 
-      Functions[i].A.last := Functions[i].A.V0;
-      Functions[i].W.last := Functions[i].W.V0;
-      Functions[i].xc.last := Functions[i].xc.V0;
+      FFunctions[i].s.v0  := 0.8;
+      FFunctions[i].s.min := 0.5;
+      FFunctions[i].s.Max := 1;
+      FFunctions[i].s.RF  := 0.01;
+
+      FFunctions[i].A.last := FFunctions[i].A.V0;
+      FFunctions[i].W.last := FFunctions[i].W.V0;
+      FFunctions[i].xc.last := FFunctions[i].xc.V0;
+      FFunctions[i].s.last := FFunctions[i].s.V0;
     end;
 
     ChiSqrMin := ChiSqrM;
@@ -209,17 +232,16 @@ var
 begin
   Init;
   N := 0;
-  while ChiSqrMin > 0 do
+  while (ChiSqrMin > 0) and (N < Nmax ) do
   begin
-    for i := Low(Functions) to High(Functions) do
+    for i := Low(FFunctions) to High(FFunctions) do
     begin
-      Swap(i, Functions[i].xc);
-      Swap(i, Functions[i].A);
-      Swap(i, Functions[i].W);
+      Swap(i, FFunctions[i].xc);
+      Swap(i, FFunctions[i].A);
+      Swap(i, FFunctions[i].W);
+      Swap(i, FFunctions[i].s);
     end;
     inc(N);
-    if N > Nmax then
-      Break;
   end;
 
   CalcResulingCurves;

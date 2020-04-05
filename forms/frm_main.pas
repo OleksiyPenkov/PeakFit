@@ -38,11 +38,15 @@ type
     Gauss1: TMenuItem;
     SumSeries: TLineSeries;
     pnlChi: TRzStatusPane;
+    Window1: TMenuItem;
+    actWinShowLog: TAction;
+    ShowLog1: TMenuItem;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure actFitGaussExecute(Sender: TObject);
+    procedure actWinShowLogExecute(Sender: TObject);
   private
     { Private declarations }
 
@@ -58,7 +62,7 @@ var
 implementation
 
 uses
-  unit_utils, unit_GaussFit, unit_const;
+  unit_utils, unit_GaussFit, unit_const, frm_log;
 
 {$R *.dfm}
 
@@ -93,10 +97,18 @@ begin
   end;
 
   for i := 0 to High(Fit.Result) do
+  begin
     DataToSeries(Fit.Result[i], ResultSeries[i]);
+    frmLog.Memo.Lines.Add('Peak ' + IntToStr(i + 1) + ' ' + Fit.Functions[i].ToString);
+  end;
 
   DataToSeries(Fit.Sum, SumSeries);
   pnlChi.Caption := FloatToStrF(Fit.LastChiSqr, ffFixed, 6, 3);
+end;
+
+procedure TfrmMain.actWinShowLogExecute(Sender: TObject);
+begin
+  frmLog.Show;
 end;
 
 procedure TfrmMain.ClearSeries;
