@@ -31,13 +31,12 @@ type
   public
     constructor Create;
     destructor Free;
-
+    procedure Init;
     function Process(const AData: TDataArray): single;
     property Result:TResults read FResults;
     property Sum:TDataArray read FSum;
     property LastChiSqr: Single read FLastChiSqr;
-    property Functions: TFitSets read FFunctions;
-
+    property Functions: TFitSets read FFunctions write FFunctions;
   end;
 
 var
@@ -156,51 +155,43 @@ begin
   inherited Destroy;
 end;
 
-function TFit.DoFitGauss(Nmax: integer):single;
+procedure TFit.Init;
 const
   peaks: array [0 .. 2] of single = (227, 230.86, 233);
+var
+  i: Integer;
+begin
+  SetLength(FFunctions, 0);
+  SetLength(FFunctions, Npeaks);
 
+  for i := Low(FFunctions) to High(FFunctions) do
+  begin
+    FFunctions[i].xc.Last  := peaks[i];
+    FFunctions[i].xc.min := peaks[i] - 1;
+    FFunctions[i].xc.max := peaks[i] + 1;
+    FFunctions[i].xc.RF  := 0.005;
+
+    FFunctions[i].A.Last  := DataValue(peaks[i]);
+    FFunctions[i].A.Max := FFunctions[i].A.Last * 3;
+    FFunctions[i].A.min := FFunctions[i].A.Last / 10;
+    FFunctions[i].A.RF  := 200;
+
+    FFunctions[i].W.Last  := 0.1;
+    FFunctions[i].W.min := 0.1;
+    FFunctions[i].W.Max := 3;
+    FFunctions[i].W.RF  := 0.05;
+
+    FFunctions[i].s.Last  := 0.8;
+    FFunctions[i].s.min := 0.5;
+    FFunctions[i].s.Max := 1;
+    FFunctions[i].s.RF  := 0.005;
+  end;
+end;
+
+function TFit.DoFitGauss(Nmax: integer):single;
 var
   ChiSqrMin, ChiSqrLast: single;
   i, N: integer;
-
-  procedure Init;
-  var
-    i: Integer;
-
-
-  begin
-    Randomize;
-    for i := Low(FFunctions) to High(FFunctions) do
-    begin
-      FFunctions[i].xc.v0  := peaks[i];
-      FFunctions[i].xc.min := peaks[i] - 1;
-      FFunctions[i].xc.max := peaks[i] + 1;
-      FFunctions[i].xc.RF  := 0.005;
-
-      FFunctions[i].A.v0  := DataValue(peaks[i]);
-      FFunctions[i].A.Max := FFunctions[i].A.v0 * 3;
-      FFunctions[i].A.min := FFunctions[i].A.v0 / 10;
-      FFunctions[i].A.RF  := 200;
-
-      FFunctions[i].W.v0  := 0.1;
-      FFunctions[i].W.min := 0.1;
-      FFunctions[i].W.Max := 3;
-      FFunctions[i].W.RF  := 0.05;
-
-      FFunctions[i].s.v0  := 0.8;
-      FFunctions[i].s.min := 0.5;
-      FFunctions[i].s.Max := 1;
-      FFunctions[i].s.RF  := 0.005;
-
-      FFunctions[i].A.last := FFunctions[i].A.V0;
-      FFunctions[i].W.last := FFunctions[i].W.V0;
-      FFunctions[i].xc.last := FFunctions[i].xc.V0;
-      FFunctions[i].s.last := FFunctions[i].s.V0;
-    end;
-
-    ChiSqrMin := ChiSqrM;
-  end;
 
   procedure Swap(const i: Integer; var V: TVariable);
   var
@@ -230,7 +221,8 @@ var
 
 
 begin
-  Init;
+  Randomize;
+  ChiSqrMin := ChiSqrM;
   N := 0;
   while (ChiSqrMin > 0) and (N < Nmax ) do
   begin

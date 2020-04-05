@@ -12,6 +12,7 @@ object frmMain: TfrmMain
   Font.Style = []
   Menu = MainMenu
   OldCreateOrder = False
+  WindowState = wsMaximized
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   PixelsPerInch = 96
@@ -26,8 +27,6 @@ object frmMain: TfrmMain
     BorderSides = [sdLeft, sdTop, sdRight, sdBottom]
     BorderWidth = 0
     TabOrder = 0
-    ExplicitTop = 553
-    ExplicitWidth = 851
     object pnlChi: TRzStatusPane
       Left = 0
       Top = 0
@@ -49,7 +48,6 @@ object frmMain: TfrmMain
     BorderSides = [sdTop]
     BorderWidth = 0
     TabOrder = 1
-    ExplicitWidth = 851
   end
   object Chart: TChart
     Left = 0
@@ -63,8 +61,6 @@ object frmMain: TfrmMain
     View3D = False
     Align = alClient
     TabOrder = 2
-    ExplicitWidth = 851
-    ExplicitHeight = 524
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object MainSeries: TLineSeries
@@ -137,6 +133,9 @@ object frmMain: TfrmMain
       object ShowLog1: TMenuItem
         Action = actWinShowLog
       end
+      object Params1: TMenuItem
+        Action = actWinFunctions
+      end
     end
     object Help1: TMenuItem
       Caption = 'Help'
@@ -169,6 +168,11 @@ object frmMain: TfrmMain
       Category = 'Window'
       Caption = 'Show Log'
       OnExecute = actWinShowLogExecute
+    end
+    object actWinFunctions: TAction
+      Category = 'Window'
+      Caption = 'Params'
+      OnExecute = actWinFunctionsExecute
     end
   end
   object dlgImportData: TOpenDialog

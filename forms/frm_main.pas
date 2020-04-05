@@ -41,12 +41,15 @@ type
     Window1: TMenuItem;
     actWinShowLog: TAction;
     ShowLog1: TMenuItem;
+    actWinFunctions: TAction;
+    Params1: TMenuItem;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure actFitGaussExecute(Sender: TObject);
     procedure actWinShowLogExecute(Sender: TObject);
+    procedure actWinFunctionsExecute(Sender: TObject);
   private
     { Private declarations }
 
@@ -62,7 +65,7 @@ var
 implementation
 
 uses
-  unit_utils, unit_GaussFit, unit_const, frm_log;
+  unit_utils, unit_GaussFit, unit_const, frm_log, frm_EditorTest;
 
 {$R *.dfm}
 
@@ -86,6 +89,7 @@ var
 begin
   ClearSeries;
   Data := SeriesToData(MainSeries);
+
   Fit.Process(Data);
 
   SetLength(ResultSeries, NPeaks);
@@ -106,6 +110,17 @@ begin
   pnlChi.Caption := FloatToStrF(Fit.LastChiSqr, ffFixed, 6, 3);
 end;
 
+procedure TfrmMain.actWinFunctionsExecute(Sender: TObject);
+begin
+  frmEditorTest.WriteData(Fit.Functions);
+  if frmEditorTest.ShowModal = mrOk then
+  begin
+    Fit.Functions := frmEditorTest.GetData;
+    actFitGaussExecute(Self);
+  end;
+
+end;
+
 procedure TfrmMain.actWinShowLogExecute(Sender: TObject);
 begin
   frmLog.Show;
@@ -124,8 +139,10 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   Fit := TFit.Create;
 
+  {$IFDEF  DEBUG}
   if ParamCount = 1 then
     SeriesFromFile(MainSeries, ParamStr(1));
+  {$ENDIF}
 end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);

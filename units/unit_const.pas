@@ -23,13 +23,13 @@ type
 
 
   TVariable =record
-    v0   : Single;
     Last : Single;
     d    : Single;
     min, max: Single;
     RF: single; //random factor
 
     function Bound:boolean;
+    function Text: string;
   end;
 
   TFitSet = record
@@ -67,6 +67,11 @@ begin
             FloatToStrF(A.Last, ffFixed, 6, 3) + '  ' +
             FloatToStrF(2 * W.Last, ffFixed, 6, 3) + '  ' +
             FloatToStrF(s.Last, ffFixed, 6, 3);
+end;
+
+function TVariable.Text: string;
+begin
+  Result := FloatToStrF(Last, ffFixed, 6, 3);
 end;
 
 end.
