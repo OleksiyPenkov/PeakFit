@@ -26,9 +26,15 @@ object frmMain: TfrmMain
     BorderSides = [sdLeft, sdTop, sdRight, sdBottom]
     BorderWidth = 0
     TabOrder = 0
-    ExplicitLeft = 376
-    ExplicitTop = 544
-    ExplicitWidth = 185
+    object pnlChi: TRzStatusPane
+      Left = 0
+      Top = 0
+      Height = 19
+      Align = alLeft
+      Caption = ''
+      ExplicitLeft = 851
+      ExplicitHeight = 20
+    end
   end
   object MainToolBar: TRzToolbar
     Left = 0
@@ -54,7 +60,6 @@ object frmMain: TfrmMain
     View3D = False
     Align = alClient
     TabOrder = 2
-    ExplicitTop = 23
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object MainSeries: TLineSeries

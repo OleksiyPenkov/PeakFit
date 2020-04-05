@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.TeeProcs, VCLTee.Chart, System.ImageList, Vcl.ImgList, RzPanel,
   Vcl.Menus, ActnCtrls, System.Actions, Vcl.ActnList, Vcl.ActnMan,
-  Vcl.ExtCtrls, VCLTee.Series;
+  Vcl.ExtCtrls, VCLTee.Series, RzStatus;
 
 type
   TfrmMain = class(TForm)
@@ -37,6 +37,7 @@ type
     actFitGauss: TAction;
     Gauss1: TMenuItem;
     SumSeries: TLineSeries;
+    pnlChi: TRzStatusPane;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -95,7 +96,7 @@ begin
     DataToSeries(Fit.Result[i], ResultSeries[i]);
 
   DataToSeries(Fit.Sum, SumSeries);
-
+  pnlChi.Caption := FloatToStrF(Fit.LastChiSqr, ffFixed, 6, 3);
 end;
 
 procedure TfrmMain.ClearSeries;
