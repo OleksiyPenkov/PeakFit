@@ -176,22 +176,22 @@ var
       FFunctions[i].xc.v0  := peaks[i];
       FFunctions[i].xc.min := peaks[i] - 1;
       FFunctions[i].xc.max := peaks[i] + 1;
-      FFunctions[i].xc.RF  := 0.05;
+      FFunctions[i].xc.RF  := 0.005;
 
       FFunctions[i].A.v0  := DataValue(peaks[i]);
       FFunctions[i].A.Max := FFunctions[i].A.v0 * 3;
       FFunctions[i].A.min := FFunctions[i].A.v0 / 10;
-      FFunctions[i].A.RF  := 50;
+      FFunctions[i].A.RF  := 200;
 
       FFunctions[i].W.v0  := 0.1;
       FFunctions[i].W.min := 0.1;
       FFunctions[i].W.Max := 3;
-      FFunctions[i].W.RF  := 0.2;
+      FFunctions[i].W.RF  := 0.05;
 
       FFunctions[i].s.v0  := 0.8;
       FFunctions[i].s.min := 0.5;
       FFunctions[i].s.Max := 1;
-      FFunctions[i].s.RF  := 0.01;
+      FFunctions[i].s.RF  := 0.005;
 
       FFunctions[i].A.last := FFunctions[i].A.V0;
       FFunctions[i].W.last := FFunctions[i].W.V0;
