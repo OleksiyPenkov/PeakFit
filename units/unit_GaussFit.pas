@@ -51,7 +51,7 @@ end;
 function TFit.Process(const AData: TDataArray): single;
 begin
   Data := AData;
-  Result := DoFitGauss(2000);
+  Result := DoFitGauss(5000);
 end;
 
 procedure TFit.CalcResulingCurves;
@@ -65,14 +65,15 @@ begin
 
   SetLength(FSum, High(Data));
 
-  for i := 1 to High(Data) do
+  for i := 0 to High(Data) do
   begin
     S := '';
     Sum := 0;
     for j := Low(Functions) to High(Functions) do
     begin
       FResults[j][i].x := Data[i].x;
-      FResults[j][i].y := GaussF(Data[i].x, Functions[j]);
+      y := GaussF(Data[i].x, Functions[j]);
+      FResults[j][i].y := y;
       Sum := Sum + y;
     end;
     FSum[i].x := Data[i].x;
@@ -100,6 +101,7 @@ constructor TFit.Create;
 begin
   inherited Create;
   SetLength(FResults, NPeaks);
+  SetLength(Functions, NPeaks);
 end;
 
 
@@ -132,6 +134,9 @@ begin
 end;
 
 function TFit.DoFitGauss(Nmax: integer):single;
+const
+  peaks: array [0 .. 1] of single = (227.5, 230.7);
+
 var
   ChiSqrMin, ChiSqrLast: single;
   i, N: integer;
@@ -139,28 +144,33 @@ var
   A0: single;
   F0: TGaussFunction;
 
-  GaussFitSets: array [1 .. NPeaks] of TGaussFitSet;
+  GaussFitSets: array of TGaussFitSet;
 
 begin
   Randomize;
 
-  F0.A := 1;
+  SetLength(GaussFitSets, NPeaks);
+
+  F0.A := 2500;
   F0.xc := peaks[1];
-  F0.W := 0.05;
+  F0.W := 1;
 
   A0 := GaussF(peaks[1], F0);
 
   for i := Low(Functions) to High(Functions) do
   begin
     GaussFitSets[i].x0 := peaks[i];
-    GaussFitSets[i].A_Max := DataValue(peaks[i]) / A0 * 1.5;
+    GaussFitSets[i].xc_min := peaks[i] - 0.25;
+    GaussFitSets[i].xc_max := peaks[i] + 0.25;
+
+    GaussFitSets[i].A_Max := DataValue(peaks[i]) * 2;
     GaussFitSets[i].A0 := GaussFitSets[i].A_Max;
 
-    GaussFitSets[i].W0 := 0.04;
-    GaussFitSets[i].A_min := 0.001;
+    GaussFitSets[i].A_min := 100;
 
-    GaussFitSets[i].W_min := 0.03;
-    GaussFitSets[i].W_Max := 0.1;
+    GaussFitSets[i].W0 := 0.5;
+    GaussFitSets[i].W_min := 0.1;
+    GaussFitSets[i].W_Max := 3;
 
     Functions[i].A := GaussFitSets[i].A0;
     Functions[i].W := GaussFitSets[i].W0;
@@ -178,6 +188,39 @@ begin
   begin
     for i := Low(Functions) to High(Functions) do
     begin
+      GaussFitSets[i].dXc := Rnd / 5;
+      Functions[i].Xc := Functions[i].Xc + GaussFitSets[i].dXc;
+
+      if (Functions[i].Xc < GaussFitSets[i].xc_min) then
+        Functions[i].Xc := GaussFitSets[i].xc_min;
+      if (Functions[i].Xc > GaussFitSets[i].xc_Max) then
+        Functions[i].Xc := GaussFitSets[i].xc_Max;
+
+      ChiSqrLast := ChiSqrM;
+      while ChiSqrLast < ChiSqrMin do
+      begin
+        GaussFitSets[i].lastX := Functions[i].Xc;
+        ChiSqrMin := ChiSqrLast;
+        GaussFitSets[i].dXc := GaussFitSets[i].dXc * Random(2);
+        Functions[i].Xc := Functions[i].Xc + GaussFitSets[i].dXc;
+
+        if (Functions[i].Xc < GaussFitSets[i].xc_min) then
+        begin
+          Functions[i].Xc := GaussFitSets[i].xc_min;
+          GaussFitSets[i].lastX := Functions[i].Xc;
+          Break;
+        end;
+        if (Functions[i].Xc > GaussFitSets[i].xc_Max) then
+        begin
+          Functions[i].Xc := GaussFitSets[i].xc_Max;
+          GaussFitSets[i].lastX := Functions[i].Xc;
+          Break;
+        end;
+
+        ChiSqrLast := ChiSqrM;
+      end;
+
+
       GaussFitSets[i].dA := Rnd / 5;
       Functions[i].A := Functions[i].A + GaussFitSets[i].dA;
 

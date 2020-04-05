@@ -7,8 +7,6 @@ const
   NPeaks = 2;
 
   sqrtpi = 1.25331;
-  peaks: array [1 .. NPeaks] of single = (227, 230);
-
 type
 
   TFitMode = (fmGauss, fmSigma);
@@ -25,7 +23,7 @@ type
     A, xc, W: single;
   end;
 
-  TGaussFunctions = array [1 .. NPeaks] of TGaussFunction;
+  TGaussFunctions = array of TGaussFunction;
 
   TSigmaFunction = record
     N, sigma, nu: Single;

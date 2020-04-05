@@ -79,6 +79,7 @@ var
   Data: TDataArray;
   i: Integer;
 begin
+  ClearSeries;
   Data := SeriesToData(MainSeries);
   Fit.Process(Data);
 
