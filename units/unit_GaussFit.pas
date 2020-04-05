@@ -12,18 +12,16 @@ type
     Max: single;
     Data: TDataArray;
 
-    Functions: TGaussFunctions;
-
-    FLastSigma: TSigmaFunction;
-
     FResults: TResults;
     FSum: TDataArray;
+
+    Functions: array of TGaussFitSet;
 
     function ChiSqrM: single;
     function DataValue(const x: single): single;
     function DoFitGauss(Nmax: integer):single;
     function Rnd: single;
-    function GaussF(const x: single; F: TGaussFunction): single;
+    function GaussF(const x: single; F: TGaussFitSet): single;
     procedure CalcResulingCurves;
     function Curve(const index: Integer): TDataArray;
   public
@@ -43,9 +41,9 @@ var
 implementation
 
 
-function TFit.GaussF(const x: single; F: TGaussFunction): single;
+function TFit.GaussF(const x: single; F: TGaussFitSet): single;
 begin
-  Result := F.A / (F.W * sqrtpi) * exp(-2 * (sqr(x - F.xc) / sqr(F.W)));;
+  Result := F.A.Last / (F.W.Last * sqrtpi) * exp(-2 * (sqr(x - F.xc.Last) / sqr(F.W.Last)));;
 end;
 
 function TFit.Process(const AData: TDataArray): single;
@@ -60,7 +58,7 @@ var
   S: string;
   Sum, y: single;
 begin
-  for j := Low(Functions) to High(Functions) do
+  for j := 0 to NPeaks - 1 do
     SetLength(FResults[j], High(Data));
 
   SetLength(FSum, High(Data));
@@ -69,7 +67,7 @@ begin
   begin
     S := '';
     Sum := 0;
-    for j := Low(Functions) to High(Functions) do
+    for j := 0 to NPeaks - 1 do
     begin
       FResults[j][i].x := Data[i].x;
       y := GaussF(Data[i].x, Functions[j]);
@@ -141,141 +139,70 @@ var
   ChiSqrMin, ChiSqrLast: single;
   i, N: integer;
 
-  GaussFitSets: array of TGaussFitSet;
-
   procedure Init;
   var
     i: Integer;
   begin
     Randomize;
-    SetLength(GaussFitSets, NPeaks);
     for i := Low(Functions) to High(Functions) do
     begin
-      GaussFitSets[i].x0 := peaks[i];
-      GaussFitSets[i].xc_min := peaks[i] - 0.25;
-      GaussFitSets[i].xc_max := peaks[i] + 0.25;
+      Functions[i].xc.v0  := peaks[i];
+      Functions[i].xc.min := peaks[i] - 0.25;
+      Functions[i].xc.max := peaks[i] + 0.25;
+      Functions[i].xc.RF  := 1;
 
-      GaussFitSets[i].A0 := DataValue(peaks[i]);
-      GaussFitSets[i].A_Max := GaussFitSets[i].A0 * 2;
-      GaussFitSets[i].A_min := GaussFitSets[i].A0 / 10;
+      Functions[i].A.v0  := DataValue(peaks[i]);
+      Functions[i].A.Max := Functions[i].A.v0 * 2;
+      Functions[i].A.min := Functions[i].A.v0 / 10;
+      Functions[i].A.RF  := 0.1;
 
-      GaussFitSets[i].W0 := 0.5;
-      GaussFitSets[i].W_min := 0.1;
-      GaussFitSets[i].W_Max := 3;
+      Functions[i].W.v0  := 0.5;
+      Functions[i].W.min := 0.1;
+      Functions[i].W.Max := 3;
+      Functions[i].W.RF  := 1;
 
-      Functions[i].A := GaussFitSets[i].A0;
-      Functions[i].W := GaussFitSets[i].W0;
-      Functions[i].xc := GaussFitSets[i].x0;
-
-      GaussFitSets[i].lastA := GaussFitSets[i].A0;
-      GaussFitSets[i].lastW := GaussFitSets[i].W0;
+      Functions[i].A.last := Functions[i].A.V0;
+      Functions[i].W.last := Functions[i].W.V0;
+      Functions[i].xc.last := Functions[i].xc.V0;
     end;
 
     ChiSqrMin := ChiSqrM;
   end;
 
-  function Bound(var val, min, max: Single):boolean;
+  procedure Swap(const i: Integer; var V: TVariable);
+  var
+    prev: Single;
   begin
-    Result := False;
-    if val < min then
-    begin
-      val := min;
-      Result := True;
-    end;
-    if val > max then
-    begin
-      val := max;
-      Result := True;
-    end;
-  end;
-
-  procedure SwapXc(const i: Integer);
-  begin
-    GaussFitSets[i].dXc := Rnd / 10;
-    Functions[i].Xc := Functions[i].Xc + GaussFitSets[i].dXc;
-    Bound(Functions[i].Xc, GaussFitSets[i].xc_min, GaussFitSets[i].xc_Max);
+    prev := V.Last;
+    V.d := Rnd / V.RF;
+    V.Last := V.Last + V.d;
+    V.Bound;
     ChiSqrLast := ChiSqrM;
     while ChiSqrLast < ChiSqrMin do
     begin
-      GaussFitSets[i].lastX := Functions[i].Xc;
       ChiSqrMin := ChiSqrLast;
-      GaussFitSets[i].dXc := GaussFitSets[i].dXc * Random(2);
-      Functions[i].Xc := Functions[i].Xc + GaussFitSets[i].dXc;
-      if Bound(Functions[i].Xc,
-               GaussFitSets[i].xc_min,
-               GaussFitSets[i].xc_Max) then
+      V.d := V.d * Random(2);
+      V.Last := V.Last + V.d;
+      if V.Bound then
       begin
-        GaussFitSets[i].lastX := Functions[i].Xc;
+        V.Last := prev;
         Break;
       end;
       ChiSqrLast := ChiSqrM;
     end;
-    Functions[i].xc := GaussFitSets[i].lastX;
-  end;
-
-
-  procedure SwapA(const i: Integer);
-  begin
-    GaussFitSets[i].dA := Rnd / 5;
-    Functions[i].A := Functions[i].A + GaussFitSets[i].dA;
-    Bound(Functions[i].A, GaussFitSets[i].A_min, GaussFitSets[i].A_Max);
-    ChiSqrLast := ChiSqrM;
-    while ChiSqrLast < ChiSqrMin do
-    begin
-      GaussFitSets[i].lastA := Functions[i].A;
-      ChiSqrMin := ChiSqrLast;
-      GaussFitSets[i].dA := GaussFitSets[i].dA * Random(2);
-      Functions[i].A := Functions[i].A + GaussFitSets[i].dA;
-      if Bound(Functions[i].A,
-               GaussFitSets[i].A_min,
-               GaussFitSets[i].A_Max) then
-      begin
-        GaussFitSets[i].lastA := Functions[i].A;
-        Break;
-      end;
-      ChiSqrLast := ChiSqrM;
-    end;
-    Functions[i].A := GaussFitSets[i].lastA;
-  end;
-
-
-  procedure SwapW(const i: Integer);
-  begin
-    GaussFitSets[i].dW := Rnd / 10;
-    Functions[i].W := Functions[i].W + GaussFitSets[i].dW;
-    Bound(Functions[i].W, GaussFitSets[i].W_min, GaussFitSets[i].W_Max);
-    ChiSqrLast := ChiSqrM;
-    while ChiSqrLast < ChiSqrMin do
-    begin
-      GaussFitSets[i].lastW := Functions[i].W;
-      ChiSqrMin := ChiSqrLast;
-      GaussFitSets[i].dW := GaussFitSets[i].dW * Random(2);
-      Functions[i].W := Functions[i].W + GaussFitSets[i].dW;
-      if Bound(Functions[i].W,
-               GaussFitSets[i].W_min,
-               GaussFitSets[i].W_Max) then
-      begin
-        GaussFitSets[i].lastW := Functions[i].W;
-        Break;
-      end;
-      ChiSqrLast := ChiSqrM;
-    end;
-    Functions[i].W := GaussFitSets[i].lastW;
   end;
 
 
 begin
   Init;
-
   N := 0;
-
   while ChiSqrMin > 0 do
   begin
     for i := Low(Functions) to High(Functions) do
     begin
-      SwapXc(i);
-      SwapA(i);
-      SwapW(i);
+      Swap(i, Functions[i].xc);
+      Swap(i, Functions[i].A);
+      Swap(i, Functions[i].W);
     end;
     inc(N);
     if N > Nmax then
