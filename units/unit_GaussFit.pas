@@ -43,7 +43,10 @@ implementation
 
 function TFit.GaussF(const x: single; F: TGaussFitSet): single;
 begin
-  Result := F.A.Last / (F.W.Last * sqrtpi) * exp(-2 * (sqr(x - F.xc.Last) / sqr(F.W.Last)));;
+//  Result := F.A.Last / (F.W.Last * sqrtpi) * exp(-2 * (sqr(x - F.xc.Last) / sqr(F.W.Last)));;
+
+  Result := F.A.Last * exp(- _4ln2 * (sqr(x - F.xc.Last) / sqr(F.W.Last)))/(F.W.Last*sqrt(pi/_4ln2));
+
 end;
 
 function TFit.Process(const AData: TDataArray): single;
@@ -133,7 +136,7 @@ end;
 
 function TFit.DoFitGauss(Nmax: integer):single;
 const
-  peaks: array [0 .. 1] of single = (227.5, 230.7);
+  peaks: array [0 .. 1] of single = (227.76, 230.86);
 
 var
   ChiSqrMin, ChiSqrLast: single;
@@ -142,24 +145,26 @@ var
   procedure Init;
   var
     i: Integer;
+
+
   begin
     Randomize;
     for i := Low(Functions) to High(Functions) do
     begin
       Functions[i].xc.v0  := peaks[i];
-      Functions[i].xc.min := peaks[i] - 0.25;
-      Functions[i].xc.max := peaks[i] + 0.25;
-      Functions[i].xc.RF  := 1;
+      Functions[i].xc.min := peaks[i] - 0.1;
+      Functions[i].xc.max := peaks[i] + 0.1;
+      Functions[i].xc.RF  := 5;
 
       Functions[i].A.v0  := DataValue(peaks[i]);
       Functions[i].A.Max := Functions[i].A.v0 * 2;
       Functions[i].A.min := Functions[i].A.v0 / 10;
       Functions[i].A.RF  := 0.1;
 
-      Functions[i].W.v0  := 0.5;
-      Functions[i].W.min := 0.1;
-      Functions[i].W.Max := 3;
-      Functions[i].W.RF  := 1;
+      Functions[i].W.v0  := 1.5;
+      Functions[i].W.min := 1;
+      Functions[i].W.Max := 2;
+      Functions[i].W.RF  := 5;
 
       Functions[i].A.last := Functions[i].A.V0;
       Functions[i].W.last := Functions[i].W.V0;
