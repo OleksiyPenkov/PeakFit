@@ -8,7 +8,8 @@ uses
   unit_utils in 'units\unit_utils.pas',
   frm_log in 'forms\frm_log.pas' {frmLog},
   unit_FunctionEditor in 'components\unit_FunctionEditor.pas',
-  frm_EditorTest in 'forms\frm_EditorTest.pas' {frmEditorTest};
+  frm_EditorTest in 'forms\frm_EditorTest.pas' {frmEditorTest},
+  unit_messages in 'units\unit_messages.pas';
 
 {$R *.res}
 

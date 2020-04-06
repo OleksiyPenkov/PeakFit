@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.TeeProcs, VCLTee.Chart, System.ImageList, Vcl.ImgList, RzPanel,
   Vcl.Menus, ActnCtrls, System.Actions, Vcl.ActnList, Vcl.ActnMan,
-  Vcl.ExtCtrls, VCLTee.Series, RzStatus, RzButton;
+  Vcl.ExtCtrls, VCLTee.Series, RzStatus, RzButton, unit_messages;
 
 type
   TfrmMain = class(TForm)
@@ -61,6 +61,7 @@ type
 
     ResultSeries: array of TLineSeries;
     procedure ClearSeries;
+    procedure OnCalcMessage(var Msg: TMessage); message WM_RECALC;
   public
     { Public declarations }
   end;
@@ -121,11 +122,8 @@ end;
 procedure TfrmMain.actWinFunctionsExecute(Sender: TObject);
 begin
   frmEditorTest.WriteData(Fit.Functions);
-  if frmEditorTest.ShowModal = mrOk then
-  begin
-    Fit.Functions := frmEditorTest.GetData;
-    actFitGaussExecute(Self);
-  end;
+  frmEditorTest.MainForm := Self.Handle;
+  frmEditorTest.ShowModal;
 
 end;
 
@@ -156,6 +154,12 @@ end;
 procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   FreeAndNil(Fit);
+end;
+
+procedure TfrmMain.OnCalcMessage(var Msg: TMessage);
+begin
+  Fit.Functions := frmEditorTest.GetData;
+  actFitGaussExecute(Self);
 end;
 
 end.

@@ -127,6 +127,7 @@
             <Form>frmEditorTest</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="units\unit_messages.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

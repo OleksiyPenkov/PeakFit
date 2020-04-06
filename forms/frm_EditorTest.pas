@@ -5,18 +5,28 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, RzGrids, Vcl.ExtCtrls,
-  RzPanel, unit_FunctionEditor, unit_const, RzButton;
+  RzPanel, unit_FunctionEditor, unit_const, RzButton, RzTabs, Vcl.StdCtrls,
+  Vcl.Mask, RzEdit, RzSpnEdt;
 
 type
   TfrmEditorTest = class(TForm)
     RzPanel1: TRzPanel;
     btnDemoData: TRzButton;
     btnFit: TRzButton;
+    rzpgcntrl1: TRzPageControl;
+    rztbshtTabSheet1: TRzTabSheet;
+    rztbshtTabSheet2: TRzTabSheet;
+    rzpnl1: TRzPanel;
+    edtNPeaks: TRzSpinEdit;
+    cbbFunction: TComboBox;
+    scrlPanel: TScrollBox;
     procedure btnDemoDataClick(Sender: TObject);
+    procedure btnFitClick(Sender: TObject);
   private
     { Private declarations }
     Grids: array of TFunctionEditor;
     FFunctions: TFitSets;
+    FMainForm: HWND;
 
     procedure  DeleteGrids;
     procedure FillTestData;
@@ -25,6 +35,7 @@ type
     procedure WriteData(Functions: TFitSets; IsDemo: boolean = False);
     function GetData:TFitSets;
     property Functions:TFitSets read FFunctions write FFunctions;
+    property MainForm:HWND write FMainForm;
   end;
 
 var
@@ -32,12 +43,20 @@ var
 
 implementation
 
+uses
+  unit_messages;
+
 {$R *.dfm}
 
 procedure TfrmEditorTest.btnDemoDataClick(Sender: TObject);
 begin
   FillTestData;
   WriteData(Functions, True);
+end;
+
+procedure TfrmEditorTest.btnFitClick(Sender: TObject);
+begin
+  PostMessage(FMainForm, WM_RECALC, 0, 0);
 end;
 
 procedure TfrmEditorTest.DeleteGrids;
@@ -103,9 +122,11 @@ begin
 
   for i := High(Grids) downto 0 do
   begin
-    Grids[i] := TFunctionEditor.Create(self);
+    Grids[i] := TFunctionEditor.Create(scrlPanel);
     Grids[i].Data := Functions[i];
   end;
+
+  edtNPeaks.Value := High(Functions) + 1;
 
 end;
 
