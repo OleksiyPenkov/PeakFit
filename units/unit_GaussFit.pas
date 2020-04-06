@@ -11,6 +11,7 @@ type
   private
     Max: single;
     Data: TDataArray;
+    Background: TDataArray;
 
     FResults: TResults;
     FSum: TDataArray;
@@ -32,7 +33,7 @@ type
     constructor Create;
     destructor Free;
     procedure Init;
-    function Process(const AData: TDataArray): single;
+    function Process(const AData, ABackground: TDataArray): single;
     property Result:TResults read FResults;
     property Sum:TDataArray read FSum;
     property LastChiSqr: Single read FLastChiSqr;
@@ -58,10 +59,11 @@ begin
   Result := F.A.Last/(1 + F.s.Last*(B*exp(0.5*(1 - F.s.Last)*B)));
 end;
 
-function TFit.Process(const AData: TDataArray): single;
+function TFit.Process(const AData, ABackground: TDataArray): single;
 begin
   Data := AData;
-  Result := DoFitGauss(1000);
+  Background := ABackground;
+  Result := DoFitGauss(5000);
 end;
 
 procedure TFit.CalcResulingCurves;
@@ -86,11 +88,11 @@ begin
         fmGauss  :  y := GaussF(Data[i].x, FFunctions[j]);
         fmGLCross:  y := GLCrossF(Data[i].x, FFunctions[j]);
       end;
-      FResults[j][i].y := y;
+      FResults[j][i].y := y + Background[i].y;
       Sum := Sum + y;
     end;
     FSum[i].x := Data[i].x;
-    FSum[i].y := Sum;
+    FSum[i].y := Sum + + Background[i].y;
   end;
 end;
 
@@ -114,7 +116,8 @@ begin
       end;
       Sum := Sum + y;
     end;
-    Result := Result + sqr(Sum - Data[i].y )/Data[i].y;
+    Sum := Sum + Background[i].y;
+    Result := Result + sqr(Sum - Data[i].y )/Data[i].y ;
   end;
 end;
 

@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, VclTee.TeeGDIPlus, VCLTee.TeEngine,
   VCLTee.TeeProcs, VCLTee.Chart, System.ImageList, Vcl.ImgList, RzPanel,
   Vcl.Menus, ActnCtrls, System.Actions, Vcl.ActnList, Vcl.ActnMan,
-  Vcl.ExtCtrls, VCLTee.Series, RzStatus;
+  Vcl.ExtCtrls, VCLTee.Series, RzStatus, RzButton;
 
 type
   TfrmMain = class(TForm)
@@ -43,6 +43,12 @@ type
     ShowLog1: TMenuItem;
     actWinFunctions: TAction;
     Params1: TMenuItem;
+    Background: TLineSeries;
+    btnBtnOpen: TRzToolButton;
+    btnBtnSave: TRzToolButton;
+    btnImport: TRzToolButton;
+    btnFit: TRzToolButton;
+    btnFunctionsWindow: TRzToolButton;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -73,7 +79,7 @@ procedure TfrmMain.actDataImportExecute(Sender: TObject);
 begin
   if dlgImportData.Execute then
   begin
-    SeriesFromFile(MainSeries, dlgImportData.FileName);
+    SeriesFromFile(MainSeries, Background, dlgImportData.FileName);
   end;
 end;
 
@@ -84,13 +90,14 @@ end;
 
 procedure TfrmMain.actFitGaussExecute(Sender: TObject);
 var
-  Data: TDataArray;
+  Data, BG: TDataArray;
   i: Integer;
 begin
   ClearSeries;
   Data := SeriesToData(MainSeries);
+  BG   := SeriesToData(Background);
 
-  Fit.Process(Data);
+  Fit.Process(Data, BG);
 
   SetLength(ResultSeries, NPeaks);
 
@@ -98,6 +105,7 @@ begin
   begin
     ResultSeries[i] := TLineSeries.Create(Chart);
     Chart.AddSeries(ResultSeries[i]);
+    ResultSeries[i].LinePen.Width := 2;
   end;
 
   for i := 0 to High(Fit.Result) do
@@ -141,7 +149,7 @@ begin
 
   {$IFDEF  DEBUG}
   if ParamCount = 1 then
-    SeriesFromFile(MainSeries, ParamStr(1));
+    SeriesFromFile(MainSeries, Background, ParamStr(1));
   {$ENDIF}
 end;
 

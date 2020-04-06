@@ -8,25 +8,23 @@ uses
   StdCtrls,
   Windows,
   Messages,
-  Dialogs;
+  Dialogs,
+  SysUtils,
+  ClipBrd,
+  Classes,
+  System.Character;
 
-
-procedure SeriesToClipboard(Series: TLineSeries);
+procedure SeriesToClipboard(Data: TLineSeries);
 procedure SeriesToFile(Series: TLineSeries; const FileName: string);
 
-procedure SeriesFromClipboard(Series: TLineSeries);
-procedure SeriesFromFile(Series: TLineSeries; const FileName: string);
+procedure SeriesFromClipboard(Data, Background: TLineSeries);
+procedure SeriesFromFile(Data, Background: TLineSeries; const FileName: string);
 
 function SeriesToData(Series: TLineSeries): TDataArray;
 procedure DataToSeries(const Data: TDataArray; var Series: TLineSeries);
 
 implementation
 
-uses
-  SysUtils,
-  ClipBrd,
-  Classes,
-  System.Character;
 
 const
   TabSeparator = #9;
@@ -73,15 +71,32 @@ begin
   end;
 end;
 
-procedure SeriesFromText(var MyStringList: TStringList; var Series:TLineSeries);
+function NumberOfColumns(const S:string): Integer;
 var
-  i, p: integer;
-  s1, s2: string;
-  x, y: single;
-  Separator: string;
+  i: Integer;
 begin
+  Result := 1;
+  for I := 1 to Length(S) do
+    if S[i] = TabSeparator then Inc(Result);
+
+end;
+
+procedure DataFromText(var MyStringList: TStringList; var Data, Background: TDataArray);
+var
+  i, p, j: integer;
+  s1, s2, s3: string;
+  x, y, b: single;
+  Separator: string;
+  NCol: Integer;
+begin
+  NCol := 2;
   Separator := TabSeparator;
-  Series.Clear;
+  SetLength(Data, 0);
+  SetLength(Background, 0);
+
+  NCol := NumberOfColumns(MyStringList.Strings[MyStringList.Count div 2]);
+
+  j := 0;
   for i := 0 to MyStringList.Count - 1 do
   begin
     s2 := MyStringList.Strings[i];
@@ -99,24 +114,102 @@ begin
 
     s1 := Copy(s2, 1, p - 1);
     delete(s2, 1, p);
+
+    if NCol = 3 then
+    begin
+      p := Pos(Separator, s2);
+      s2 := Copy(s2, 1, p - 1);
+      s3 := Copy(s2, p + 1, Length(s2) - p - 1);
+    end;
+
     if (s1 <> '') and (s2 <> '') and IsNumber(s1[1]) and IsNumber(s2[1]) then
     try
+      SetLength(Data, Length(Data) + 1);
+      SetLength(Background, Length(Background) + 1);
       x := StrToFloat(s1);
       y := StrToFloat(s2);
-      Series.AddXY(x, y);
+      Data[j].x := x;
+      Background[j].x := x;
+      Data[j].y := y;
+      if (NCol = 3) and IsNumber(s3[1]) then
+      begin
+        b := StrToFloat(s3);
+        Background[j].y := b;
+      end
+      else
+        Background[j].y := 0;
+
     except
       on EConvertError do;
     end;
     end;
 end;
 
-procedure SeriesToClipboard(Series: TLineSeries);
+procedure SeriesFromText(var MyStringList: TStringList; var Data, Background:TLineSeries);
+var
+  i, p: integer;
+  s1, s2, s3: string;
+  x, y, b: single;
+  Separator: string;
+  NCol: Integer;
+begin
+  NCol := 2;
+  Separator := TabSeparator;
+  Data.Clear;
+  Background.Clear;
+
+  NCol := NumberOfColumns(MyStringList.Strings[MyStringList.Count div 2]);
+
+  for i := 0 to MyStringList.Count - 1 do
+  begin
+    s2 := MyStringList.Strings[i];
+    if s2 = '' then Continue;
+
+    p := Pos(Separator, s2);
+    if p = 0 then
+    begin
+      Separator := ' ';
+      p := Pos(Separator, s2);
+    end;
+
+    if p = 0 then Continue;
+
+    s1 := Copy(s2, 1, p - 1);
+    delete(s2, 1, p);
+
+    if NCol = 3 then
+    begin
+      p := Pos(Separator, s2);
+      s3 := Copy(s2, p + 1, Length(s2) - p - 1);
+      s2 := Copy(s2, 1, p - 1);
+    end;
+
+    if (s1 <> '') and (s2 <> '') and IsNumber(s1[1]) and IsNumber(s2[1]) then
+    try
+      x := StrToFloat(s1);
+      y := StrToFloat(s2);
+      Data.AddXY(x, y);
+
+      if (NCol = 3) and IsNumber(s3[1]) then
+      begin
+        b := StrToFloat(s3);
+        Background.AddXY(x, b);
+      end
+      else
+        Background.AddXY(x, 0);
+    except
+      on EConvertError do;
+    end;
+    end;
+end;
+
+procedure SeriesToClipboard(Data: TLineSeries);
 var
   MyStringList: TStringList;
 begin
   MyStringList := TStringList.Create;
   try
-    SeriesToText(MyStringList, Series);
+    SeriesToText(MyStringList, Data);
     Clipboard.AsText := MyStringList.Text;
   finally
     MyStringList.Free;
@@ -136,20 +229,20 @@ begin
   end;
 end;
 
-procedure SeriesFromClipboard(Series: TLineSeries);
+procedure SeriesFromClipboard(Data, Background: TLineSeries);
 var
   MyStringList: TStringList;
 begin
   MyStringList := TStringList.Create;
   try
     MyStringList.Text := Clipboard.AsText;
-    SeriesFromText(MyStringList, Series);
+    SeriesFromText(MyStringList, Data, Background);
   finally
     MyStringList.Free;
   end;
 end;
 
-procedure SeriesFromFile(Series: TLineSeries; const FileName: string);
+procedure SeriesFromFile(Data, Background: TLineSeries; const FileName: string);
 var
   MyStringList: TStringList;
   S: string;
@@ -158,11 +251,10 @@ begin
   MyStringList := TStringList.Create;
   try
     MyStringList.LoadFromFile(FileName);
-    SeriesFromText(MyStringList, Series);
+    SeriesFromText(MyStringList, Data, Background);
   finally
     MyStringList.Free;
   end;
 end;
-
 
 end.

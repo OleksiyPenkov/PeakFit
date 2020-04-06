@@ -68,7 +68,7 @@ begin
 
     FFunctions[i].A.Last  := 2000;
     FFunctions[i].A.Max := 4000;
-    FFunctions[i].A.min := 100;
+    FFunctions[i].A.min := 50;
     FFunctions[i].A.RF  := 200;
 
     FFunctions[i].W.Last  := 0.1;
