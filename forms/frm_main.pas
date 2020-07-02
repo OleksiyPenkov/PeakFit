@@ -100,7 +100,7 @@ begin
 
   Fit.Process(Data, BG);
 
-  SetLength(ResultSeries, NPeaks);
+  SetLength(ResultSeries, High(Fit.Functions) + 1);
 
   for I := 0 to High(ResultSeries) do
   begin
@@ -160,6 +160,7 @@ procedure TfrmMain.OnCalcMessage(var Msg: TMessage);
 begin
   Fit.Functions := frmEditorTest.GetData;
   actFitGaussExecute(Self);
+  frmEditorTest.WriteData(Fit.Functions);
 end;
 
 end.

@@ -4,6 +4,7 @@ interface
 
 uses
   VCLTee.Series,
+  VCLTee.TeEngine,
   unit_const,
   StdCtrls,
   Windows,
@@ -89,7 +90,6 @@ var
   Separator: string;
   NCol: Integer;
 begin
-  NCol := 2;
   Separator := TabSeparator;
   SetLength(Data, 0);
   SetLength(Background, 0);
@@ -122,7 +122,7 @@ begin
       s3 := Copy(s2, p + 1, Length(s2) - p - 1);
     end;
 
-    if (s1 <> '') and (s2 <> '') and IsNumber(s1[1]) and IsNumber(s2[1]) then
+    if (s1 <> '') and (s2 <> '') and (s1[1].IsNumber and s2[1].IsNumber) then
     try
       SetLength(Data, Length(Data) + 1);
       SetLength(Background, Length(Background) + 1);
@@ -131,7 +131,7 @@ begin
       Data[j].x := x;
       Background[j].x := x;
       Data[j].y := y;
-      if (NCol = 3) and IsNumber(s3[1]) then
+      if (NCol = 3) and (s3[1].IsNumber) then
       begin
         b := StrToFloat(s3);
         Background[j].y := b;
@@ -153,7 +153,6 @@ var
   Separator: string;
   NCol: Integer;
 begin
-  NCol := 2;
   Separator := TabSeparator;
   Data.Clear;
   Background.Clear;
@@ -184,13 +183,13 @@ begin
       s2 := Copy(s2, 1, p - 1);
     end;
 
-    if (s1 <> '') and (s2 <> '') and IsNumber(s1[1]) and IsNumber(s2[1]) then
+    if (s1 <> '') and (s2 <> '') and (s1[1].IsNumber) and (s2[1].IsNumber) then
     try
       x := StrToFloat(s1);
       y := StrToFloat(s2);
       Data.AddXY(x, y);
 
-      if (NCol = 3) and IsNumber(s3[1]) then
+      if (NCol = 3) and  (s3[1].IsNumber) then
       begin
         b := StrToFloat(s3);
         Background.AddXY(x, b);
@@ -245,8 +244,6 @@ end;
 procedure SeriesFromFile(Data, Background: TLineSeries; const FileName: string);
 var
   MyStringList: TStringList;
-  S: string;
-  i: Integer;
 begin
   MyStringList := TStringList.Create;
   try

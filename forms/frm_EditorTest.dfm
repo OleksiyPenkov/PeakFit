@@ -22,8 +22,8 @@ object frmEditorTest: TfrmEditorTest
     Height = 37
     Align = alBottom
     BorderOuter = fsFlatRounded
+    Color = 15987699
     TabOrder = 0
-    ExplicitWidth = 476
     object btnDemoData: TRzButton
       Left = 8
       Top = 8
@@ -49,17 +49,9 @@ object frmEditorTest: TfrmEditorTest
     Align = alClient
     TabIndex = 0
     TabOrder = 1
-    ExplicitLeft = 96
-    ExplicitTop = 24
-    ExplicitWidth = 300
-    ExplicitHeight = 150
     FixedDimension = 19
     object rztbshtTabSheet1: TRzTabSheet
       Caption = 'Functions'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object rzpnl1: TRzPanel
         AlignWithMargins = True
         Left = 3
@@ -68,9 +60,8 @@ object frmEditorTest: TfrmEditorTest
         Height = 41
         Align = alTop
         BorderOuter = fsFlatRounded
+        Color = 15987699
         TabOrder = 0
-        ExplicitLeft = 4
-        ExplicitTop = 23
         object edtNPeaks: TRzSpinEdit
           Left = 426
           Top = 11
@@ -101,18 +92,10 @@ object frmEditorTest: TfrmEditorTest
         Align = alClient
         BorderStyle = bsNone
         TabOrder = 1
-        ExplicitLeft = 1
-        ExplicitTop = 188
-        ExplicitWidth = 288
-        ExplicitHeight = 260
       end
     end
     object rztbshtTabSheet2: TRzTabSheet
       Caption = 'Parameters'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
   end
 end

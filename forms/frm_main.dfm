@@ -26,6 +26,7 @@ object frmMain: TfrmMain
     BorderOuter = fsNone
     BorderSides = [sdLeft, sdTop, sdRight, sdBottom]
     BorderWidth = 0
+    Color = 15987699
     TabOrder = 0
     object pnlChi: TRzStatusPane
       Left = 0
@@ -53,6 +54,7 @@ object frmMain: TfrmMain
     BorderOuter = fsGroove
     BorderSides = [sdTop]
     BorderWidth = 0
+    Color = 15987699
     TabOrder = 1
     ToolbarControls = (
       btnBtnOpen

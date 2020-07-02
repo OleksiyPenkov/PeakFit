@@ -53,7 +53,7 @@ end;
 
 function TFit.GLCrossF(const x: single; F: TFitSet): single;
 var
-  A, B: Single;
+  B: Single;
 begin
   B := sqr((x - F.xc.Last)/F.W.Last);
   Result := F.A.Last/(1 + F.s.Last*(B*exp(0.5*(1 - F.s.Last)*B)));
@@ -72,7 +72,8 @@ var
   S: string;
   Sum, y: single;
 begin
-  for j := 0 to NPeaks - 1 do
+  SetLength(FResults, High(FFunctions) + 1);
+  for j := 0 to High(FFunctions) do
     SetLength(FResults[j], High(Data));
 
   SetLength(FSum, High(Data));
@@ -81,7 +82,7 @@ begin
   begin
     S := '';
     Sum := 0;
-    for j := 0 to NPeaks - 1 do
+    for j := 0 to High(FFunctions) do
     begin
       FResults[j][i].x := Data[i].x;
       case FMode of
@@ -124,8 +125,8 @@ end;
 constructor TFit.Create;
 begin
   inherited Create;
-  SetLength(FResults, NPeaks);
-  SetLength(FFunctions, NPeaks);
+  SetLength(FResults, 0);
+  SetLength(FFunctions, 0);
   FMode := fmGLCross;
 end;
 
@@ -165,7 +166,7 @@ var
   i: Integer;
 begin
   SetLength(FFunctions, 0);
-  SetLength(FFunctions, Npeaks);
+  SetLength(FFunctions, High(Peaks) + 1);
 
   for i := Low(FFunctions) to High(FFunctions) do
   begin

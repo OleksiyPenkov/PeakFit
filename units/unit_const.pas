@@ -4,8 +4,6 @@ interface
 
 const
 
-  NPeaks = 3;
-
   sqrtpi = 1.25331;
   _4ln2  = 2.772588722;
 

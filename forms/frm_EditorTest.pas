@@ -71,18 +71,18 @@ end;
 
 procedure TfrmEditorTest.FillTestData;
 const
-  peaks: array [0 .. 2] of single = (227, 230.86, 233);
+  peaks: array [0 .. 4] of single = (227.7, 228.1, 230.8, 231.2, 233);
 var
   i: Integer;
 begin
   SetLength(FFunctions, 0);
-  SetLength(FFunctions, Npeaks);
+  SetLength(FFunctions, Length(peaks));
 
   for i := Low(FFunctions) to High(FFunctions) do
   begin
     FFunctions[i].xc.Last  := peaks[i];
-    FFunctions[i].xc.min := peaks[i] - 1;
-    FFunctions[i].xc.max := peaks[i] + 1;
+    FFunctions[i].xc.min := peaks[i] - 0.25;
+    FFunctions[i].xc.max := peaks[i] + 0.25;
     FFunctions[i].xc.RF  := 0.005;
 
     FFunctions[i].A.Last  := 2000;
@@ -91,8 +91,8 @@ begin
     FFunctions[i].A.RF  := 200;
 
     FFunctions[i].W.Last  := 0.1;
-    FFunctions[i].W.min := 0.1;
-    FFunctions[i].W.Max := 3;
+    FFunctions[i].W.min := 0.3;
+    FFunctions[i].W.Max := 0.9;
     FFunctions[i].W.RF  := 0.05;
 
     FFunctions[i].s.Last  := 0.8;
