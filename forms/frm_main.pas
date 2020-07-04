@@ -52,6 +52,7 @@ type
     actFileSave: TAction;
     actFileOpen: TAction;
     dlgSave: TSaveDialog;
+    dlgOpen: TOpenDialog;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -60,12 +61,14 @@ type
     procedure actWinShowLogExecute(Sender: TObject);
     procedure actWinFunctionsExecute(Sender: TObject);
     procedure actFileSaveExecute(Sender: TObject);
+    procedure actFileOpenExecute(Sender: TObject);
   private
     { Private declarations }
 
     ResultSeries: array of TLineSeries;
     procedure ClearSeries;
     procedure OnCalcMessage(var Msg: TMessage); message WM_RECALC;
+    procedure PlotGraphs;
   public
     { Public declarations }
   end;
@@ -93,23 +96,34 @@ begin
   Close;
 end;
 
+procedure TfrmMain.actFileOpenExecute(Sender: TObject);
+var
+  Data, BG: TDataArray;
+begin
+ if dlgOpen.Execute then
+ begin
+   LoadProject(MainSeries, Background, dlgOpen.FileName);
+
+     ClearSeries;
+   Data := SeriesToData(MainSeries);
+   BG   := SeriesToData(Background);
+   Fit.NMax := 0;
+   Fit.Process(Data, BG);
+   PlotGraphs;
+   Fit.NMax := 5000;
+ end;
+end;
+
 procedure TfrmMain.actFileSaveExecute(Sender: TObject);
 begin
  if dlgSave.Execute then
    SaveProject(MainSeries, Background, dlgSave.FileName);
 end;
 
-procedure TfrmMain.actFitGaussExecute(Sender: TObject);
+procedure TfrmMain.PlotGraphs;
 var
-  Data, BG: TDataArray;
   i: Integer;
 begin
-  ClearSeries;
-  Data := SeriesToData(MainSeries);
-  BG   := SeriesToData(Background);
-
-  Fit.Process(Data, BG);
-
   SetLength(ResultSeries, High(Fit.Functions) + 1);
 
   for I := 0 to High(ResultSeries) do
@@ -127,6 +141,20 @@ begin
 
   DataToSeries(Fit.Sum, SumSeries);
   pnlChi.Caption := FloatToStrF(Fit.LastChiSqr, ffFixed, 6, 3);
+
+end;
+
+procedure TfrmMain.actFitGaussExecute(Sender: TObject);
+var
+  Data, BG: TDataArray;
+
+begin
+  ClearSeries;
+  Data := SeriesToData(MainSeries);
+  BG   := SeriesToData(Background);
+
+  Fit.Process(Data, BG);
+  PlotGraphs;
 end;
 
 procedure TfrmMain.actWinFunctionsExecute(Sender: TObject);
@@ -154,10 +182,10 @@ procedure TfrmMain.FormCreate(Sender: TObject);
 begin
   Fit := TFit.Create;
 
-  {$IFDEF  DEBUG}
-  if ParamCount = 1 then
-    SeriesFromFile(MainSeries, Background, ParamStr(1));
-  {$ENDIF}
+//  {$IFDEF  DEBUG}
+//  if ParamCount = 1 then
+//    SeriesFromFile(MainSeries, Background, ParamStr(1));
+//  {$ENDIF}
 end;
 
 procedure TfrmMain.FormDestroy(Sender: TObject);

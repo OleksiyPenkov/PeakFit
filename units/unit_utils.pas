@@ -24,10 +24,15 @@ procedure SeriesFromFile(Data, Background: TLineSeries; const FileName: string);
 
 function SeriesToData(Series: TLineSeries): TDataArray;
 procedure DataToSeries(const Data: TDataArray; var Series: TLineSeries);
+procedure SeriesFromText(var MyStringList: TStringList; var Data, Background:TLineSeries);
+procedure SeriesFromTextS(var MyStringList: TStringList; var Data:TLineSeries);
 
 function FunctionToJSON(F: TFitSet; Id: integer): TJSONObject;
 procedure FunctionsToLines(F: TFitSets; var Strings: TStringList);
+procedure FunctionsFromStrings(Strings: TStringList; var F: TFitSets);
+
 procedure SaveProject(Data, Background: TLineSeries; FileName: string);
+procedure LoadProject(Data, Background: TLineSeries; FileName: string);
 
 implementation
 
@@ -36,12 +41,103 @@ uses
   AbUtils,
   AbBase,
   AbZipper,
+  AbUnzper,
   AbZipTyp,
   unit_GaussFit;
 
 const
   TabSeparator = #9;
 
+procedure JSONtoFunction(JVar: TJSONObject; var F: TFitSet);
+var
+  Param: TJSONObject;
+
+  procedure ParseVariable(Name: string; var Variable: TVariable);
+  begin
+    Param := JVar.GetValue<TJSONObject>(Name);
+
+    Variable.Last := Param.Values['Last'].AsType<Single>;
+    Variable.d := Param.Values['d'].AsType<Single>;
+    Variable.min := Param.Values['min'].AsType<Single>;
+    Variable.max := Param.Values['max'].AsType<Single>;
+  end;
+
+begin
+  ParseVariable('A', F.A);
+  ParseVariable('xc', F.xc);
+  ParseVariable('W', F.W);
+  ParseVariable('s', F.s);
+end;
+
+procedure FunctionsFromStrings(Strings: TStringList; var F: TFitSets);
+var
+  JSON, JVar: TJSONObject;
+  JSONArray: TJSONArray;
+  JsonArrEnum: TJSONArray.TEnumerator;
+  i: Integer;
+begin
+  SetLength(F, 0);
+  JSON := TJSONObject.Create;
+  JSON.Parse(TEncoding.UTF8.GetBytes(Strings.Text), 0);
+  JSONArray := TJSONArray.Create;
+
+  JSONArray := JSON.GetValue<TJSONArray>('Fits');
+  SetLength(F, JSONArray.Count);
+  JsonArrEnum:=JSONArray.GetEnumerator;
+
+  i := 0;
+  while JsonArrEnum.MoveNext do
+  begin
+    JSONtoFunction((JSONArrEnum.Current as TJSONObject), F[i]);
+    inc(i);
+  end;
+
+
+end;
+
+
+procedure LoadProject(Data, Background: TLineSeries; FileName: string);
+var
+  Strings: TStringList;
+  Stream: TMemoryStream;
+  Zipper: TAbUnZipper;
+  F: TFitSets;
+
+  procedure ExtractToStringList(const FileName: string);
+  begin
+    Stream.Clear;
+    Zipper.ExtractToStream (FileName, Stream);
+    Stream.Seek(0, soFromBeginning);
+    Strings.LoadFromStream(Stream);
+  end;
+
+
+begin
+  Strings := TStringList.Create;
+  Stream  := TMemoryStream.Create;
+
+  try
+    Zipper := TAbUnZipper.Create(Nil);
+    Zipper.ArchiveType := atZip;
+    Zipper.ForceType := True;
+    Zipper.FileName := FileName;
+
+    ExtractToStringList('background.dat');
+    SeriesFromTextS(Strings, Background);
+
+    ExtractToStringList('Data.dat');
+    SeriesFromTextS(Strings, Data);
+
+    ExtractToStringList('FitFunctions.json');
+    FunctionsFromStrings(Strings, F);
+
+    Fit.Functions := F;
+  finally
+    FreeAndNil(Strings);
+    FreeAndNil(Stream);
+    FreeAndNil(Zipper);
+  end;
+end;
 
 procedure SaveProject(Data, Background: TLineSeries; FileName: string);
 var
@@ -177,9 +273,6 @@ var
   s: string;
   x, y: single;
 begin
-  MyStringList.Add('2Theta' + TabSeparator + 'Reflectivity');
-  MyStringList.Add('deg' + TabSeparator + '');
-  MyStringList.Add('');
   N := Series.Count;
   for i := 0 to N - 1 do
   begin
@@ -319,6 +412,46 @@ begin
       on EConvertError do;
     end;
     end;
+end;
+
+
+procedure SeriesFromTextS(var MyStringList: TStringList; var Data :TLineSeries);
+var
+  i, p: integer;
+  s1, s2, s3: string;
+  x, y, b: single;
+  Separator: string;
+begin
+  Separator := TabSeparator;
+  Data.Clear;
+
+  for i := 0 to MyStringList.Count - 1 do
+  begin
+    s2 := MyStringList.Strings[i];
+    if s2 = '' then Continue;
+
+    p := Pos(Separator, s2);
+    if p = 0 then
+    begin
+      Separator := ' ';
+      p := Pos(Separator, s2);
+    end;
+
+    if p = 0 then Continue;
+
+    s1 := Copy(s2, 1, p - 1);
+    delete(s2, 1, p);
+
+    if (s1 <> '') and (s2 <> '') and (s1[1].IsNumber) and (s2[1].IsNumber) then
+    try
+      x := StrToFloat(s1);
+      y := StrToFloat(s2);
+      Data.AddXY(x, y);
+
+    except
+      on EConvertError do;
+    end;
+  end;
 end;
 
 procedure SeriesToClipboard(Data: TLineSeries);

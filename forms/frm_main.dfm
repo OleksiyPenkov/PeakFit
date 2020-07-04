@@ -657,6 +657,7 @@ object frmMain: TfrmMain
       Category = 'File'
       Caption = 'Open'
       ImageIndex = 0
+      OnExecute = actFileOpenExecute
     end
   end
   object dlgImportData: TOpenDialog
@@ -669,5 +670,9 @@ object frmMain: TfrmMain
     Filter = 'Fit projects|*.fit'
     Left = 544
     Top = 212
+  end
+  object dlgOpen: TOpenDialog
+    Left = 384
+    Top = 252
   end
 end

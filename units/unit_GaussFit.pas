@@ -20,10 +20,10 @@ type
 
     FFunctions: TFitSets;
     FMode: TFitMode;
+    FNMax: Integer;
 
     function ChiSqrM: single;
     function DataValue(const x: single): single;
-    function DoFitGauss(Nmax: integer):single;
     function Rnd: single;
     function GaussF(const x: single; F: TFitSet): single;
     procedure CalcResulingCurves;
@@ -33,11 +33,13 @@ type
     constructor Create;
     destructor Free;
     procedure Init;
+    function DoFitGauss(Nmax: integer):single;
     function Process(const AData, ABackground: TDataArray): single;
     property Result:TResults read FResults;
     property Sum:TDataArray read FSum;
     property LastChiSqr: Single read FLastChiSqr;
     property Functions: TFitSets read FFunctions write FFunctions;
+    property NMax: Integer write FNMax;
   end;
 
 var
@@ -63,7 +65,7 @@ function TFit.Process(const AData, ABackground: TDataArray): single;
 begin
   Data := AData;
   Background := ABackground;
-  Result := DoFitGauss(5000);
+  Result := DoFitGauss(FNMax);
 end;
 
 procedure TFit.CalcResulingCurves;
@@ -128,6 +130,7 @@ begin
   SetLength(FResults, 0);
   SetLength(FFunctions, 0);
   FMode := fmGLCross;
+  FNMax := 5000;
 end;
 
 
