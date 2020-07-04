@@ -65,26 +65,21 @@ object frmMain: TfrmMain
     object btnBtnOpen: TRzToolButton
       Left = 4
       Top = 2
-      Hint = 'Open'
       DisabledIndex = 1
-      ImageIndex = 0
       Layout = blGlyphTop
-      Caption = 'Open'
+      Action = actFileOpen
     end
     object btnBtnSave: TRzToolButton
       Left = 64
       Top = 2
-      Hint = 'Save'
       DisabledIndex = 3
-      ImageIndex = 2
       Layout = blGlyphTop
-      Caption = 'Save'
+      Action = actFileSave
     end
     object btnImport: TRzToolButton
       Left = 124
       Top = 2
       DisabledIndex = 5
-      ImageIndex = 4
       Layout = blGlyphTop
       Action = actDataImport
       Caption = 'Import'
@@ -93,7 +88,6 @@ object frmMain: TfrmMain
       Left = 184
       Top = 2
       DisabledIndex = 7
-      ImageIndex = 6
       Layout = blGlyphTop
       Action = actFitGauss
     end
@@ -101,7 +95,6 @@ object frmMain: TfrmMain
       Left = 244
       Top = 2
       DisabledIndex = 9
-      ImageIndex = 8
       Layout = blGlyphTop
       Action = actWinFunctions
       Caption = 'Functions'
@@ -622,6 +615,7 @@ object frmMain: TfrmMain
       000000000000}
   end
   object Actions: TActionList
+    Images = ImageList32
     Left = 416
     Top = 117
     object actFileExit: TAction
@@ -632,11 +626,13 @@ object frmMain: TfrmMain
     object actDataImport: TAction
       Category = 'File'
       Caption = 'Import form file'
+      ImageIndex = 4
       OnExecute = actDataImportExecute
     end
     object actFitGauss: TAction
       Category = 'File'
       Caption = 'Fit Gauss'
+      ImageIndex = 6
       ShortCut = 116
       OnExecute = actFitGaussExecute
     end
@@ -648,12 +644,30 @@ object frmMain: TfrmMain
     object actWinFunctions: TAction
       Category = 'Window'
       Caption = 'Params'
+      ImageIndex = 8
       OnExecute = actWinFunctionsExecute
+    end
+    object actFileSave: TAction
+      Category = 'File'
+      Caption = 'Save'
+      ImageIndex = 2
+      OnExecute = actFileSaveExecute
+    end
+    object actFileOpen: TAction
+      Category = 'File'
+      Caption = 'Open'
+      ImageIndex = 0
     end
   end
   object dlgImportData: TOpenDialog
     DefaultExt = '*.dat'
     Left = 544
     Top = 117
+  end
+  object dlgSave: TSaveDialog
+    DefaultExt = '.fit'
+    Filter = 'Fit projects|*.fit'
+    Left = 544
+    Top = 212
   end
 end

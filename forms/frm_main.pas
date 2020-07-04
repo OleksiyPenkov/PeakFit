@@ -49,6 +49,9 @@ type
     btnImport: TRzToolButton;
     btnFit: TRzToolButton;
     btnFunctionsWindow: TRzToolButton;
+    actFileSave: TAction;
+    actFileOpen: TAction;
+    dlgSave: TSaveDialog;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -56,6 +59,7 @@ type
     procedure actFitGaussExecute(Sender: TObject);
     procedure actWinShowLogExecute(Sender: TObject);
     procedure actWinFunctionsExecute(Sender: TObject);
+    procedure actFileSaveExecute(Sender: TObject);
   private
     { Private declarations }
 
@@ -87,6 +91,12 @@ end;
 procedure TfrmMain.actFileExitExecute(Sender: TObject);
 begin
   Close;
+end;
+
+procedure TfrmMain.actFileSaveExecute(Sender: TObject);
+begin
+ if dlgSave.Execute then
+   SaveProject(MainSeries, Background, dlgSave.FileName);
 end;
 
 procedure TfrmMain.actFitGaussExecute(Sender: TObject);
@@ -124,8 +134,7 @@ begin
   frmEditorTest.WriteData(Fit.Functions);
   frmEditorTest.MainForm := Self.Handle;
   frmEditorTest.ShowModal;
-
-end;
+ end;
 
 procedure TfrmMain.actWinShowLogExecute(Sender: TObject);
 begin
@@ -162,5 +171,6 @@ begin
   actFitGaussExecute(Self);
   frmEditorTest.WriteData(Fit.Functions);
 end;
+
 
 end.

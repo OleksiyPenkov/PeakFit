@@ -13,10 +13,11 @@ uses
   SysUtils,
   ClipBrd,
   Classes,
-  System.Character;
+  System.JSON;
 
 procedure SeriesToClipboard(Data: TLineSeries);
 procedure SeriesToFile(Series: TLineSeries; const FileName: string);
+procedure SeriesToText(var MyStringList: TStringList; var Series:TLineSeries);
 
 procedure SeriesFromClipboard(Data, Background: TLineSeries);
 procedure SeriesFromFile(Data, Background: TLineSeries; const FileName: string);
@@ -24,12 +25,130 @@ procedure SeriesFromFile(Data, Background: TLineSeries; const FileName: string);
 function SeriesToData(Series: TLineSeries): TDataArray;
 procedure DataToSeries(const Data: TDataArray; var Series: TLineSeries);
 
+function FunctionToJSON(F: TFitSet; Id: integer): TJSONObject;
+procedure FunctionsToLines(F: TFitSets; var Strings: TStringList);
+procedure SaveProject(Data, Background: TLineSeries; FileName: string);
+
 implementation
 
+uses
+  System.Character,
+  AbUtils,
+  AbBase,
+  AbZipper,
+  AbZipTyp,
+  unit_GaussFit;
 
 const
   TabSeparator = #9;
 
+
+procedure SaveProject(Data, Background: TLineSeries; FileName: string);
+var
+  Strings: TStringList;
+  Stream: TMemoryStream;
+  Zipper: TAbZipper;
+
+  procedure AddString(const FN: string);
+  begin
+    Strings.SaveToStream(Stream);
+    Stream.Seek(0, soFromBeginning);
+    Zipper.AddFromStream(FN, Stream);
+    Stream.Clear;
+    Strings.Clear;
+  end;
+
+begin
+
+  if FileExists(FileName) then SysUtils.DeleteFile(FileName);
+
+  Strings := TStringList.Create;
+  Stream  := TMemoryStream.Create;
+
+  try
+    Zipper := TAbZipper.Create(Nil);
+    Zipper.ArchiveType := atZip;
+    Zipper.AutoSave := True;
+    Zipper.ForceType := True;
+    Zipper.CompressionMethodToUse := smDeflated;
+    Zipper.DeflationOption := doNormal;
+    Zipper.FileName := FileName;
+
+    FunctionsToLines(Fit.Functions, Strings);
+    AddString('FitFunctions.json');
+
+    SeriesToText(Strings, Background);
+    AddString('background.dat');
+
+    SeriesToText(Strings, Data);
+    AddString('Data.dat');
+
+    Zipper.CloseArchive;
+  finally
+    FreeAndNil(Strings);
+    FreeAndNil(Stream);
+    FreeAndNil(Zipper);
+  end;
+end;
+
+
+procedure FunctionsToLines(F: TFitSets; var Strings: TStringList);
+var
+  i: Integer;
+
+  JSON: TJSONObject;
+  JSONArray: TJSONArray;
+begin
+  JSON := TJSONObject.Create;
+
+  try
+    JSON.AddPair('Contents','FitFunctions');
+    JSONArray := TJSONArray.Create;
+
+    for I := 0 to High(F) do
+      JSONArray.Addelement(FunctionToJSON(F[i],i));
+
+    JSON.AddPair('Fits', JSONArray);
+
+    Strings.Text := JSON.ToString;
+  finally
+    FreeAndNil(JSON);
+  end;
+end;
+
+
+function JSonVariable(V: TVariable):TJSONObject;
+begin
+  Result := TJSONObject.Create;
+
+  Result.AddPair('Last', TJSONNumber.Create(V.Last));
+  Result.AddPair('d', TJSONNumber.Create(V.d));
+  Result.AddPair('min', TJSONNumber.Create(V.min));
+  Result.AddPair('max', TJSONNumber.Create(V.max));
+end;
+
+
+function FunctionToJSON(F: TFitSet; Id: integer): TJSONObject;
+var
+  JVar: TJSONObject;
+
+begin
+  Result := TJSONObject.Create;
+  Result.AddPair('ID', TJSONNumber.Create(Id));
+
+  JVar := JSonVariable(F.A);
+  Result.AddPair('A', JVar);
+
+  JVar := JSonVariable(F.xc);
+  Result.AddPair('xc', JVar);
+
+  JVar := JSonVariable(F.W);
+  Result.AddPair('W', JVar);
+
+  JVar := JSonVariable(F.s);
+  Result.AddPair('s', JVar);
+
+end;
 
 procedure DataToSeries(const Data: TDataArray; var Series: TLineSeries);
 var
