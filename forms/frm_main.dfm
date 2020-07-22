@@ -37,6 +37,24 @@ object frmMain: TfrmMain
       ExplicitLeft = 851
       ExplicitHeight = 20
     end
+    object StatusX: TRzStatusPane
+      Left = 100
+      Top = 0
+      Height = 19
+      Align = alLeft
+      Caption = ''
+      ExplicitLeft = 1009
+      ExplicitHeight = 20
+    end
+    object StatusY: TRzStatusPane
+      Left = 200
+      Top = 0
+      Height = 19
+      Align = alLeft
+      Caption = ''
+      ExplicitLeft = 1009
+      ExplicitHeight = 20
+    end
   end
   object MainToolBar: TRzToolbar
     Left = 0
@@ -110,8 +128,10 @@ object frmMain: TfrmMain
     Title.Text.Strings = (
       'TChart')
     Title.Visible = False
+    Shadow.Visible = False
     View3D = False
     Align = alClient
+    Color = clWhite
     TabOrder = 2
     OnDblClick = ChartDblClick
     OnMouseMove = ChartMouseMove

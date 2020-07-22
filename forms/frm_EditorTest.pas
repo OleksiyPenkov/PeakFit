@@ -34,7 +34,7 @@ type
     procedure SetDefault(var F: TFitSet);
   public
     { Public declarations }
-    procedure AddFunction(Pos: single);
+    procedure AddFunction(X, Y: single);
 
     procedure WriteData(Functions: TFitSets; IsDemo: boolean = False);
     function GetData:TFitSets;
@@ -52,7 +52,7 @@ uses
 
 {$R *.dfm}
 
-procedure TfrmEditorTest.AddFunction(Pos: single);
+procedure TfrmEditorTest.AddFunction;
 var
   N : integer;
 begin
@@ -60,15 +60,20 @@ begin
   SetLength(FFunctions, N);
 
   SetDefault(FFunctions[N - 1]);
-  FFunctions[N - 1].xc.Last := Pos;
-  FFunctions[N - 1].xc.min := Pos - 0.25;
-  FFunctions[N - 1].xc.max := Pos + 0.25;
+  FFunctions[N - 1].xc.Last := X;
+  FFunctions[N - 1].xc.min := X - 0.25;
+  FFunctions[N - 1].xc.max := X + 0.25;
 
+  FFunctions[N - 1].A.Last := Y;
+  FFunctions[N - 1].A.min := Y /5 ;
+  FFunctions[N - 1].A.max := Y * 3;
 
   SetLength(Grids, N);
 
   Grids[N - 1] := TFunctionEditor.Create(scrlPanel);
-  Grids[N - 1].Data := Functions[N - 1];end;
+  Grids[N - 1].Data := Functions[N - 1];
+
+end;
 
 procedure TfrmEditorTest.btnDemoDataClick(Sender: TObject);
 begin

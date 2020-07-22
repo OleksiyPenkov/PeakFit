@@ -53,6 +53,8 @@ type
     actFileOpen: TAction;
     dlgSave: TSaveDialog;
     dlgOpen: TOpenDialog;
+    StatusX: TRzStatusPane;
+    StatusY: TRzStatusPane;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -70,6 +72,7 @@ type
     FLastX: single;
 
     ResultSeries: array of TLineSeries;
+    FLastY: Single;
     procedure ClearSeries;
     procedure OnCalcMessage(var Msg: TMessage); message WM_RECALC;
     procedure PlotGraphs;
@@ -174,11 +177,23 @@ begin
 end;
 
 procedure TfrmMain.ChartDblClick(Sender: TObject);
+var
+  Data, BG: TDataArray;
 begin
-  frmEditorTest.AddFunction(FLastX);
+  if frmEditorTest.Visible then
+  begin
+     frmEditorTest.AddFunction(FLastX, FLastY);
+     Fit.Functions := frmEditorTest.GetData;
 
+     ClearSeries;
+     Data := SeriesToData(MainSeries);
+     BG   := SeriesToData(Background);
+     Fit.NMax := 0;
+     Fit.Process(Data, BG);
+     PlotGraphs;
+     Fit.NMax := 5000;
 
-
+  end;
 
 end;
 
@@ -191,11 +206,8 @@ begin
 
   xv := MainSeries.XScreenToValue(X);
   yv := MainSeries.YScreenToValue(Y);
-//  StatusX.Caption := FloatToStrF(xv, ffFixed, 4, 3);
-//  if yv < 0.01 then
-//    StatusY.Caption := FloatToStrF(yv, ffExponent, 3, 2)
-//  else
-//    StatusY.Caption := FloatToStrF(yv, ffFixed, 4, 3);
+  StatusX.Caption := FloatToStrF(xv, ffFixed, 6, 2);
+  StatusY.Caption := FloatToStrF(yv, ffFixed, 6, 2);
 
   R := Chart.Legend.RectLegend;
 
@@ -205,6 +217,7 @@ begin
     Chart.Cursor := crCross;
 
   FLastX := xv;
+  FLastY := yv;
 end;
 
 procedure TfrmMain.ClearSeries;

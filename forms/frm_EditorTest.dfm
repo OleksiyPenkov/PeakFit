@@ -97,10 +97,6 @@ object frmEditorTest: TfrmEditorTest
     end
     object rztbshtTabSheet2: TRzTabSheet
       Caption = 'Parameters'
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
   end
 end
