@@ -5,20 +5,23 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, RzGrids, Vcl.ExtCtrls,
-  RzPanel, RzCommon, unit_const;
+  RzPanel, RzCommon, RzRadChk, unit_const;
 
 type
 
   TFunctionEditor = class(TRzPanel)
     private
       Grid: TRzStringGrid;
+      CheckBox: TRzCheckbox;
     function GetData: TFitSet;
     procedure SetData(const Value: TFitSet);
+    function GetChecked: boolean;
     published
       constructor Create(AOwner: TComponent); override;
       destructor Free;
 
       property Data:TFitSet read GetData write SetData;
+      property Checked: boolean read GetChecked;
   end;
 
 implementation
@@ -50,6 +53,7 @@ begin
   Grid.Options := [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing];
   Grid.TabOrder := 0;
   Grid.FrameVisible := True;
+  Grid.Margins.Left  := 27;
 
   Grid.Cells[0, 1] := 'A';
   Grid.Cells[0, 2] := 'Xc';
@@ -60,11 +64,22 @@ begin
   Grid.Cells[2, 0] := 'min';
   Grid.Cells[3, 0] := 'max';
 
+  CheckBox := TRzCheckbox.Create(Self);
+  CheckBox.Parent := Self;
+  CheckBox.Top := 50;
+  CheckBox.Left := 5;
 end;
 
 destructor TFunctionEditor.Free;
 begin
+  FreeAndNil(Grid);
+  FreeAndNil(CheckBox);
+end;
 
+function TFunctionEditor.GetChecked: boolean;
+begin
+  if Assigned(CheckBox) then
+    Result := CheckBox.Checked;
 end;
 
 function TFunctionEditor.GetData: TFitSet;

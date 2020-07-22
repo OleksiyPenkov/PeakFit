@@ -17,11 +17,12 @@ type
     rztbshtTabSheet1: TRzTabSheet;
     rztbshtTabSheet2: TRzTabSheet;
     rzpnl1: TRzPanel;
-    edtNPeaks: TRzSpinEdit;
     cbbFunction: TComboBox;
     scrlPanel: TScrollBox;
+    btnAdd: TButton;
     procedure btnDemoDataClick(Sender: TObject);
     procedure btnFitClick(Sender: TObject);
+    procedure btnAddClick(Sender: TObject);
   private
     { Private declarations }
     Grids: array of TFunctionEditor;
@@ -30,8 +31,11 @@ type
 
     procedure  DeleteGrids;
     procedure FillTestData;
+    procedure SetDefault(var F: TFitSet);
   public
     { Public declarations }
+    procedure AddFunction(Pos: single);
+
     procedure WriteData(Functions: TFitSets; IsDemo: boolean = False);
     function GetData:TFitSets;
     property Functions:TFitSets read FFunctions write FFunctions;
@@ -48,6 +52,24 @@ uses
 
 {$R *.dfm}
 
+procedure TfrmEditorTest.AddFunction(Pos: single);
+var
+  N : integer;
+begin
+  N := Length(FFunctions) + 1;
+  SetLength(FFunctions, N);
+
+  SetDefault(FFunctions[N - 1]);
+  FFunctions[N - 1].xc.Last := Pos;
+  FFunctions[N - 1].xc.min := Pos - 0.25;
+  FFunctions[N - 1].xc.max := Pos + 0.25;
+
+
+  SetLength(Grids, N);
+
+  Grids[N - 1] := TFunctionEditor.Create(scrlPanel);
+  Grids[N - 1].Data := Functions[N - 1];end;
+
 procedure TfrmEditorTest.btnDemoDataClick(Sender: TObject);
 begin
   FillTestData;
@@ -57,6 +79,21 @@ end;
 procedure TfrmEditorTest.btnFitClick(Sender: TObject);
 begin
   PostMessage(FMainForm, WM_RECALC, 0, 0);
+end;
+
+procedure TfrmEditorTest.btnAddClick(Sender: TObject);
+var
+  N : integer;
+begin
+  N := Length(FFunctions) + 1;
+  SetLength(FFunctions, N);
+
+  SetDefault(FFunctions[N-1]);
+
+  SetLength(Grids, N);
+
+  Grids[N - 1] := TFunctionEditor.Create(scrlPanel);
+  Grids[N - 1].Data := Functions[N - 1];
 end;
 
 procedure TfrmEditorTest.DeleteGrids;
@@ -83,22 +120,7 @@ begin
     FFunctions[i].xc.Last  := peaks[i];
     FFunctions[i].xc.min := peaks[i] - 0.25;
     FFunctions[i].xc.max := peaks[i] + 0.25;
-    FFunctions[i].xc.RF  := 0.005;
-
-    FFunctions[i].A.Last  := 2000;
-    FFunctions[i].A.Max := 4000;
-    FFunctions[i].A.min := 50;
-    FFunctions[i].A.RF  := 200;
-
-    FFunctions[i].W.Last  := 0.1;
-    FFunctions[i].W.min := 0.3;
-    FFunctions[i].W.Max := 0.9;
-    FFunctions[i].W.RF  := 0.05;
-
-    FFunctions[i].s.Last  := 0.8;
-    FFunctions[i].s.min := 0.5;
-    FFunctions[i].s.Max := 1;
-    FFunctions[i].s.RF  := 0.005;
+    SetDefault(FFunctions[i]);
   end;
 end;
 
@@ -109,6 +131,26 @@ begin
   SetLength(Result, Length(Grids));
   for I := 0 to High(Grids) do
     Result[i] := Grids[i].Data;
+end;
+
+procedure TfrmEditorTest.SetDefault(var F: TFitSet);
+begin
+    F.xc.RF  := 0.005;
+
+    F.A.Last  := 2000;
+    F.A.Max := 4000;
+    F.A.min := 50;
+    F.A.RF  := 200;
+
+    F.W.Last  := 0.1;
+    F.W.min := 0.3;
+    F.W.Max := 0.9;
+    F.W.RF  := 0.05;
+
+    F.s.Last  := 0.8;
+    F.s.min := 0.5;
+    F.s.Max := 1;
+    F.s.RF  := 0.005;
 end;
 
 procedure TfrmEditorTest.WriteData;
@@ -125,9 +167,6 @@ begin
     Grids[i] := TFunctionEditor.Create(scrlPanel);
     Grids[i].Data := Functions[i];
   end;
-
-  edtNPeaks.Value := High(Functions) + 1;
-
 end;
 
 end.

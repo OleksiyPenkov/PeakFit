@@ -1,24 +1,24 @@
 object frmEditorTest: TfrmEditorTest
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
   Caption = 'Fitting'
-  ClientHeight = 514
-  ClientWidth = 487
+  ClientHeight = 504
+  ClientWidth = 492
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  FormStyle = fsStayOnTop
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
   object RzPanel1: TRzPanel
     AlignWithMargins = True
     Left = 3
-    Top = 474
-    Width = 481
+    Top = 464
+    Width = 486
     Height = 37
     Align = alBottom
     BorderOuter = fsFlatRounded
@@ -42,8 +42,8 @@ object frmEditorTest: TfrmEditorTest
   object rzpgcntrl1: TRzPageControl
     Left = 0
     Top = 0
-    Width = 487
-    Height = 471
+    Width = 492
+    Height = 461
     Hint = ''
     ActivePage = rztbshtTabSheet1
     Align = alClient
@@ -56,26 +56,18 @@ object frmEditorTest: TfrmEditorTest
         AlignWithMargins = True
         Left = 3
         Top = 3
-        Width = 477
+        Width = 482
         Height = 41
         Align = alTop
         BorderOuter = fsFlatRounded
         Color = 15987699
         TabOrder = 0
-        object edtNPeaks: TRzSpinEdit
-          Left = 426
-          Top = 11
-          Width = 47
-          Height = 21
-          Max = 100.000000000000000000
-          TabOrder = 0
-        end
         object cbbFunction: TComboBox
           Left = 8
           Top = 11
           Width = 145
           Height = 21
-          TabOrder = 1
+          TabOrder = 0
           Text = 'Gauss-Lorentz cross'
           Items.Strings = (
             'Gaussian'
@@ -83,12 +75,21 @@ object frmEditorTest: TfrmEditorTest
             'Assym 1'
             'Assym 2')
         end
+        object btnAdd: TButton
+          Left = 248
+          Top = 9
+          Width = 75
+          Height = 25
+          Caption = 'Add'
+          TabOrder = 1
+          OnClick = btnAddClick
+        end
       end
       object scrlPanel: TScrollBox
         Left = 0
         Top = 47
-        Width = 483
-        Height = 401
+        Width = 488
+        Height = 391
         Align = alClient
         BorderStyle = bsNone
         TabOrder = 1
@@ -96,6 +97,10 @@ object frmEditorTest: TfrmEditorTest
     end
     object rztbshtTabSheet2: TRzTabSheet
       Caption = 'Parameters'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
 end

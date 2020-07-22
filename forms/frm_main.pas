@@ -62,8 +62,12 @@ type
     procedure actWinFunctionsExecute(Sender: TObject);
     procedure actFileSaveExecute(Sender: TObject);
     procedure actFileOpenExecute(Sender: TObject);
+    procedure ChartDblClick(Sender: TObject);
+    procedure ChartMouseMove(Sender: TObject; Shift: TShiftState; X,
+      Y: Integer);
   private
     { Private declarations }
+    FLastX: single;
 
     ResultSeries: array of TLineSeries;
     procedure ClearSeries;
@@ -161,12 +165,46 @@ procedure TfrmMain.actWinFunctionsExecute(Sender: TObject);
 begin
   frmEditorTest.WriteData(Fit.Functions);
   frmEditorTest.MainForm := Self.Handle;
-  frmEditorTest.ShowModal;
+  frmEditorTest.Show;
  end;
 
 procedure TfrmMain.actWinShowLogExecute(Sender: TObject);
 begin
   frmLog.Show;
+end;
+
+procedure TfrmMain.ChartDblClick(Sender: TObject);
+begin
+  frmEditorTest.AddFunction(FLastX);
+
+
+
+
+end;
+
+procedure TfrmMain.ChartMouseMove(Sender: TObject; Shift: TShiftState; X,
+  Y: Integer);
+var
+  xv, yv: single;
+  R: TRect;
+begin
+
+  xv := MainSeries.XScreenToValue(X);
+  yv := MainSeries.YScreenToValue(Y);
+//  StatusX.Caption := FloatToStrF(xv, ffFixed, 4, 3);
+//  if yv < 0.01 then
+//    StatusY.Caption := FloatToStrF(yv, ffExponent, 3, 2)
+//  else
+//    StatusY.Caption := FloatToStrF(yv, ffFixed, 4, 3);
+
+  R := Chart.Legend.RectLegend;
+
+  if (X > R.Left) and (X < R.Right) and (Y > R.Top) and (Y < R.Bottom) then
+    Chart.Cursor := crArrow
+  else
+    Chart.Cursor := crCross;
+
+  FLastX := xv;
 end;
 
 procedure TfrmMain.ClearSeries;

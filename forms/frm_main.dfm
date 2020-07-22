@@ -105,6 +105,7 @@ object frmMain: TfrmMain
     Top = 44
     Width = 1009
     Height = 689
+    Cursor = crCross
     Legend.Visible = False
     Title.Text.Strings = (
       'TChart')
@@ -112,6 +113,8 @@ object frmMain: TfrmMain
     View3D = False
     Align = alClient
     TabOrder = 2
+    OnDblClick = ChartDblClick
+    OnMouseMove = ChartMouseMove
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
     object MainSeries: TLineSeries
