@@ -147,7 +147,7 @@ begin
     F.A.min := 50;
     F.A.RF  := 200;
 
-    F.W.Last  := 0.1;
+    F.W.Last  := 0.4;
     F.W.min := 0.3;
     F.W.Max := 0.9;
     F.W.RF  := 0.05;

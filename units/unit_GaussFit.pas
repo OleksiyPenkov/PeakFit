@@ -33,6 +33,7 @@ type
     constructor Create;
     destructor Free;
     procedure Init;
+    procedure Zero;
     function DoFitGauss(Nmax: integer):single;
     function Process(const AData, ABackground: TDataArray): single;
     property Result:TResults read FResults;
@@ -144,6 +145,11 @@ begin
   Result := (Random(100) - 50) / 50;
 end;
 
+procedure TFit.Zero;
+begin
+  SetLength(FFunctions, 0);
+end;
+
 function TFit.DataValue(const x: single): single;
 var
   i: integer;
@@ -174,8 +180,8 @@ begin
   for i := Low(FFunctions) to High(FFunctions) do
   begin
     FFunctions[i].xc.Last  := peaks[i];
-    FFunctions[i].xc.min := peaks[i] - 1;
-    FFunctions[i].xc.max := peaks[i] + 1;
+    FFunctions[i].xc.min := peaks[i] - 0.2;
+    FFunctions[i].xc.max := peaks[i] + 0.2;
     FFunctions[i].xc.RF  := 0.005;
 
     FFunctions[i].A.Last  := DataValue(peaks[i]);
@@ -184,13 +190,13 @@ begin
     FFunctions[i].A.RF  := 200;
 
     FFunctions[i].W.Last  := 0.1;
-    FFunctions[i].W.min := 0.1;
+    FFunctions[i].W.min := 0.5;
     FFunctions[i].W.Max := 3;
     FFunctions[i].W.RF  := 0.05;
 
-    FFunctions[i].s.Last  := 0.8;
-    FFunctions[i].s.min := 0.5;
-    FFunctions[i].s.Max := 1;
+    FFunctions[i].s.Last  := 0.6;
+    FFunctions[i].s.min := 0.4;
+    FFunctions[i].s.Max := 0.8;
     FFunctions[i].s.RF  := 0.005;
   end;
 end;

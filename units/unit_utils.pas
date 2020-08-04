@@ -71,7 +71,7 @@ end;
 
 procedure FunctionsFromStrings(Strings: TStringList; var F: TFitSets);
 var
-  JSON, JVar: TJSONObject;
+  JSON: TJSONObject;
   JSONArray: TJSONArray;
   JsonArrEnum: TJSONArray.TEnumerator;
   i: Integer;
@@ -418,8 +418,8 @@ end;
 procedure SeriesFromTextS(var MyStringList: TStringList; var Data :TLineSeries);
 var
   i, p: integer;
-  s1, s2, s3: string;
-  x, y, b: single;
+  s1, s2: string;
+  x, y: single;
   Separator: string;
 begin
   Separator := TabSeparator;

@@ -52,6 +52,10 @@ object frmEditorTest: TfrmEditorTest
     FixedDimension = 19
     object rztbshtTabSheet1: TRzTabSheet
       Caption = 'Functions'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object rzpnl1: TRzPanel
         AlignWithMargins = True
         Left = 3
@@ -97,6 +101,10 @@ object frmEditorTest: TfrmEditorTest
     end
     object rztbshtTabSheet2: TRzTabSheet
       Caption = 'Parameters'
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
   end
 end
