@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
-  Caption = 'Peak Fit'
+  Caption = 'XPS Peak Fit'
   ClientHeight = 752
   ClientWidth = 1009
   Color = clBtnFace
@@ -147,6 +147,12 @@ object frmMain: TfrmMain
       'TChart')
     Title.Visible = False
     OnClickSeries = ChartClickSeries
+    BottomAxis.LabelsFormat.Font.Height = -13
+    BottomAxis.Title.Caption = 'Binding Energy (eV)'
+    BottomAxis.Title.Font.Height = -19
+    LeftAxis.LabelsFormat.Font.Height = -13
+    LeftAxis.Title.Caption = 'Intensity (cps)'
+    LeftAxis.Title.Font.Height = -21
     Shadow.Visible = False
     View3D = False
     Align = alClient
@@ -202,6 +208,15 @@ object frmMain: TfrmMain
       Caption = 'File'
       object Open1: TMenuItem
         Action = actFileOpen
+      end
+      object N3: TMenuItem
+        Caption = '-'
+      end
+      object Loadfunctions1: TMenuItem
+        Action = actFileLoadFunctions
+      end
+      object N4: TMenuItem
+        Caption = '-'
       end
       object Save1: TMenuItem
         Action = actFileSave
@@ -864,6 +879,12 @@ object frmMain: TfrmMain
       Category = 'File'
       Caption = 'New'
       OnExecute = actFileNewExecute
+    end
+    object actFileLoadFunctions: TAction
+      Category = 'File'
+      Caption = 'Load functions'
+      ShortCut = 16460
+      OnExecute = actFileLoadFunctionsExecute
     end
   end
   object dlgImportData: TOpenDialog

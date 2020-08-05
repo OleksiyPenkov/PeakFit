@@ -32,7 +32,7 @@ procedure FunctionsToLines(F: TFitSets; var Strings: TStringList);
 procedure FunctionsFromStrings(Strings: TStringList; var F: TFitSets);
 
 procedure SaveProject(Data, Background: TLineSeries; FileName: string);
-procedure LoadProject(Data, Background: TLineSeries; FileName: string);
+procedure LoadProject(Data, Background: TLineSeries; FileName: string; FunctionsOnly: boolean = False);
 
 implementation
 
@@ -96,7 +96,7 @@ begin
 end;
 
 
-procedure LoadProject(Data, Background: TLineSeries; FileName: string);
+procedure LoadProject(Data, Background: TLineSeries; FileName: string; FunctionsOnly: boolean = False);
 var
   Strings: TStringList;
   Stream: TMemoryStream;
@@ -122,11 +122,16 @@ begin
     Zipper.ForceType := True;
     Zipper.FileName := FileName;
 
-    ExtractToStringList('background.dat');
-    SeriesFromTextS(Strings, Background);
+    if not FunctionsOnly then
+    begin
 
-    ExtractToStringList('Data.dat');
-    SeriesFromTextS(Strings, Data);
+      ExtractToStringList('background.dat');
+      SeriesFromTextS(Strings, Background);
+
+      ExtractToStringList('Data.dat');
+      SeriesFromTextS(Strings, Data);
+
+    end;
 
     ExtractToStringList('FitFunctions.json');
     FunctionsFromStrings(Strings, F);

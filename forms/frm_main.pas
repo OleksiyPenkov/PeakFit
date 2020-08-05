@@ -64,6 +64,10 @@ type
     Saveas1: TMenuItem;
     actFileNew: TAction;
     BtnNew: TRzToolButton;
+    actFileLoadFunctions: TAction;
+    N3: TMenuItem;
+    N4: TMenuItem;
+    Loadfunctions1: TMenuItem;
     procedure actFileExitExecute(Sender: TObject);
     procedure actDataImportExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -85,6 +89,7 @@ type
     procedure actToolsShiftExecute(Sender: TObject);
     procedure actFileSaveAsExecute(Sender: TObject);
     procedure actFileNewExecute(Sender: TObject);
+    procedure actFileLoadFunctionsExecute(Sender: TObject);
   private
     { Private declarations }
     FFileName: string;
@@ -130,18 +135,35 @@ begin
   Close;
 end;
 
-procedure TfrmMain.actFileNewExecute(Sender: TObject);
+procedure TfrmMain.actFileLoadFunctionsExecute(Sender: TObject);
 var
-  i: integer;
+  Data, BG: TDataArray;
+begin
+ if dlgOpen.Execute then
+ begin
+   ClearSeries;
+   Fit.Zero;
+
+   Data := SeriesToData(MainSeries);
+   BG   := SeriesToData(Background);
+
+   LoadProject(MainSeries, Background, dlgOpen.FileName, True);
+
+   Fit.NMax := 0;
+   Fit.Process(Data, BG);
+   PlotGraphs;
+   Fit.NMax := 5000;
+
+   SetCaption;
+ end;end;
+
+
+procedure TfrmMain.actFileNewExecute(Sender: TObject);
 begin
   MainSeries.Clear;
   Background.Clear;
-  SumSeries.Clear;
+  ClearSeries;
 
-  for I := 0 to High(ResultSeries) do
-    FreeAndNil(ResultSeries[i]);
-
-  SetLength(ResultSeries, 0);
   Fit.Zero;
 
   FFileName := 'NONAME';
@@ -225,12 +247,17 @@ var
   Data, BG: TDataArray;
 
 begin
-  ClearSeries;
-  Data := SeriesToData(MainSeries);
-  BG   := SeriesToData(Background);
+  try
+    Screen.Cursor := crHourGlass;
+    ClearSeries;
+    Data := SeriesToData(MainSeries);
+    BG   := SeriesToData(Background);
 
-  Fit.Process(Data, BG);
-  PlotGraphs;
+    Fit.Process(Data, BG);
+    PlotGraphs;
+  finally
+    Screen.Cursor := crDefault;
+  end;
 end;
 
 procedure TfrmMain.actResultExportClpbrdExecute(Sender: TObject);
@@ -429,6 +456,7 @@ procedure TfrmMain.ClearSeries;
 var
   i: Integer;
 begin
+  SumSeries.Clear;
   for I := 0 to High(ResultSeries) do
     ResultSeries[i].Free;
   SetLength(ResultSeries, 0);
